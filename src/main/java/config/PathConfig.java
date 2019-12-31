@@ -14,7 +14,7 @@ public class PathConfig {
 //    public static String base = "/workspace/";
 
     // 项目当前路径
-    public static String ROOT_PATH = "/mnt/share/CloneDetection/";
+    public static String ROOT_PATH = "/mnt/share/FCDetector/";
 //    public static String ROOT_PATH = "/scanner";
 
     public static String SRC_FOLDER_PATH = base + File.separator + "src";
@@ -35,6 +35,8 @@ public class PathConfig {
     public static String EMBEDDING_FEATURE_WORD2VEC_PATH = base + File.separator + "embedding_feature_word2vec";
     public static String EMBEDDING_FUNC_HOPE_PATH = base + File.separator + "embedding_func_HOPE";
     public static String EMBEDDING_FEATURE_HOPE_PATH = base + File.separator + "embedding_feature_HOPE";
+
+    public static String FEATURE_CFG_DOT_FOLDER_PATH = base + File.separator + "feature_dot";
 
     public static String IDENT_EMBED_PATH = base + File.separator + "identEmbed";
     public static String CFG_EMBED_PATH = base + File.separator + "cfgEmbed";
@@ -72,6 +74,11 @@ public class PathConfig {
         File cpgFolder = new File(CPG_FOLDER_PATH);
         if (!cpgFolder.exists()) {
             cpgFolder.mkdir();
+        }
+
+        File featureCfgDotFolder = new File(FEATURE_CFG_DOT_FOLDER_PATH);
+        if (!featureCfgDotFolder.exists()) {
+            featureCfgDotFolder.mkdir();
         }
     }
 }

@@ -8,6 +8,7 @@ import config.CFGConfig;
 import method.Method;
 import method.MethodCall;
 import org.checkerframework.checker.units.qual.C;
+import tool.Tool;
 
 import java.util.*;
 
@@ -86,7 +87,6 @@ public class Feature {
             cfgEdgeSet.addAll(callerCfgEdgeSet);
             cfgEdgeSet.addAll(calleeCfgEdgeSet);
         }
-
         Map<String, CFGNode> id2CFGNodeMap = new HashMap<>();
         for (CFGNode cfgNode : cfgNodeSet) {
             id2CFGNodeMap.put(cfgNode.getId(), cfgNode);
@@ -110,6 +110,7 @@ public class Feature {
             if (selectedCFGNode == null) {
                 continue;
             }
+            System.out.println(selectedCFGNode);
             needDeleteCFGNodeSet.add(selectedCFGNode);
 
             // in selected node
@@ -128,11 +129,6 @@ public class Feature {
                 }
             }
             CFGGraph methodCalleeCFGGraph = methodCFGGraphMap.get(methodCall.getCalleeMethod());
-
-//            System.out.println(methodCalleeCFGGraph.getCfgNodeSet());
-//            System.out.println(methodCalleeCFGGraph.getPureCFGEdgeSet());
-
-//            System.exit(0);
 
             CFGNode entryNode = getEntry(methodCalleeCFGGraph);
             CFGNode exitNode = getExit(methodCalleeCFGGraph);

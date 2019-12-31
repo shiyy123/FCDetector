@@ -29,44 +29,42 @@ public class GenerateCall {
         List<File> fileList = Tool.getSourceFilesFromPath("/mnt/share/CloneData/data/src");
 
         for (File sourceFile : fileList) {
-//            if (!sourceFile.getAbsolutePath().equals("/mnt/share/CloneData/data/src/1/150.cpp")) {
+
+            if (!sourceFile.getAbsolutePath().equals("/mnt/share/CloneData/data/src/0/8.c")) {
+                continue;
+            }
+            String subPath = Tool.getFolderAndFilePath(sourceFile);
+
+//            String s = PathConfig.FEATURE_CFG_FOLDER_PATH + File.separator + subPath;
+//            File dotFolder = new File(s);
+//            if (dotFolder.exists()) {
 //                continue;
 //            }
 
-
-            System.out.println(sourceFile.getAbsolutePath());
-            String subPath = Tool.getFolderAndFilePath(sourceFile);
-
-            String s = PathConfig.FEATURE_CFG_FOLDER_PATH + File.separator + subPath;
-            File dotFolder = new File(s);
-            if (dotFolder.exists()) {
-                continue;
-            }
-
             // get cpg
             String cpgPath = PathConfig.CPG_FOLDER_PATH + File.separator + subPath + File.separator + "cpg.bin.zip";
-            File cpgFile = cpg.getCPGFileBySourceFolder(sourceFile, cpgPath);
-//            File cpgFile = new File(cpgPath);
+//            File cpgFile = cpg.getCPGFileBySourceFolder(sourceFile, cpgPath);
+            File cpgFile = new File(cpgPath);
 
             // get ast
             String astPath = PathConfig.AST_FOLDER_PATH + File.separator + subPath + File.separator + "ast.dot";
-            File astFile = cpg.getASTFileByCPGFile(cpgFile, astPath);
-//            File astFile = new File(astPath);
+//            File astFile = cpg.getASTFileByCPGFile(cpgFile, astPath);
+            File astFile = new File(astPath);
 
             // get cfg
             String cfgPath = PathConfig.CFG_FOLDER_PATH + File.separator + subPath + File.separator + "cfg.dot";
-            File cfgFile = cpg.getCFGFileByCPGFile(cpgFile, cfgPath);
-//            File cfgFile = new File(cfgPath);
+//            File cfgFile = cpg.getCFGFileByCPGFile(cpgFile, cfgPath);
+            File cfgFile = new File(cfgPath);
 
             // get method info
             String methodInfoPath = PathConfig.METHOD_INFO_FOLDER_PATH + File.separator + subPath + File.separator + "methodInfo.txt";
-            File methodInfoFile = cpg.getMethodInfoFileByCpgFile(cpgFile, methodInfoPath);
-//            File methodInfoFile = new File(methodInfoPath);
+//            File methodInfoFile = cpg.getMethodInfoFileByCpgFile(cpgFile, methodInfoPath);
+            File methodInfoFile = new File(methodInfoPath);
 
             // get call
             String callPath = PathConfig.CALL_FOLDER_PATH + File.separator + subPath + File.separator + "call.txt";
-            File callFile = cpg.getCallFileByCPGFile(cpgFile, callPath);
-//            File callFile = new File(callPath);
+//            File callFile = cpg.getCallFileByCPGFile(cpgFile, callPath);
+            File callFile = new File(callPath);
 
             // get method info list, contain location, start line and end line, etc
             List<MethodInfo> methodInfoList = MethodInfo.getMethodInfoListByMethodInfoFile(methodInfoFile);
@@ -102,23 +100,22 @@ public class GenerateCall {
                         break;
                     }
                 }
-
                 CFGGraph cfgGraph = Tool.getCFGGraphOfSelectedMethod(methodList, selectedMethod);
                 File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(cfgGraph, featureCfgDotPath);
             } else {
                 // construct by call relationship
-//                System.out.println(methodCallList.size());
-//                System.out.println(methodCallList);
                 List<Feature> featureList = Feature.getFeatureFromMethodCallList(methodCallList);
                 for (int i = 0; i < featureList.size(); i++) {
                     Feature feature = featureList.get(i);
                     CFGGraph cfgGraph = Feature.generateCFGByFeature(feature, methodCFGGraphMap);
+
+                    Tool.simplifyCFGGraphOfAddedCallRelationship(cfgGraph);
+                    System.exit(0);
+
                     String featureCfgDotPath = PathConfig.FEATURE_CFG_FOLDER_PATH + File.separator + subPath + File.separator + i + ".dot";
                     File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(cfgGraph, featureCfgDotPath);
                 }
             }
-
-//            System.exit(0);
         }
     }
 }
