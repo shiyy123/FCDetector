@@ -30,9 +30,11 @@ public class GenerateCall {
 
         for (File sourceFile : fileList) {
 
-            if (!sourceFile.getAbsolutePath().contains("/mnt/share/CloneData/data/src/0/")) {
-                continue;
-            }
+            System.out.println(sourceFile.getAbsolutePath());
+
+//            if (!sourceFile.getAbsolutePath().contains("/mnt/share/CloneData/data/src/0/")) {
+//                continue;
+//            }
             String subPath = Tool.getFolderAndFilePath(sourceFile);
 
 //            String s = PathConfig.FEATURE_CFG_FOLDER_PATH + File.separator + subPath;
@@ -103,10 +105,13 @@ public class GenerateCall {
                 // remove some literal
                 CFGGraph cfgGraph = Tool.getCFGGraphOfSelectedMethod(methodList, selectedMethod);
 
+                Tool.constructCFGDotFileOfCFGGraph(cfgGraph, "/home/cary/Documents/a.dot");
+
                 // remove redundant node
                 CFGGraph simplifyCfgGraph = Tool.simplifyCFGGraphOfAddedCallRelationship(cfgGraph);
 
                 File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(simplifyCfgGraph, featureCfgDotPath);
+
             } else {
                 // construct by call relationship
                 List<Feature> featureList = Feature.getFeatureFromMethodCallList(methodCallList);

@@ -406,6 +406,10 @@ public class Tool {
             CFGNode outCfgNode = id2CFGNode.get(cfgEdge.getOut());
             CFGNode inCfgNode = id2CFGNode.get(cfgEdge.getIn());
 
+            if (inCfgNode == null || outCfgNode == null) {
+                continue;
+            }
+
             // is not method entry and method exit node
             if (!outCfgNode.isMethodNode() && !outCfgNode.isMethodReturnNode() &&
                     !inCfgNode.isMethodNode() && !inCfgNode.isMethodReturnNode()) {
@@ -430,13 +434,15 @@ public class Tool {
                         }
                     }
 
-
+                    boolean flag = false;
                     if (cnt1 == 1 && cnt2 == 1) {
                         CFGNode outOutCfgNode = id2CFGNode.get(toOutEdge.getOut());
                         String outOutCode = outOutCfgNode.getProperties().getOrDefault(CFGConfig.CODE_PROPERTY, "");
                         int outOutLineNum = Integer.parseInt(outOutCfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "-1"));
 
                         if (inCode.contains(outOutCode) && inLineNum == outOutLineNum) {
+
+                            flag = true;
 
                             needDeleteCfgEdgeSet.add(toOutEdge);
                             needDeleteCfgEdgeSet.add(toInEdge);
@@ -462,7 +468,7 @@ public class Tool {
                             }
                         }
                     }
-                    if (cnt1 == 1) {
+                    if (!flag && cnt1 == 1) {
                         needDeleteCfgEdgeSet.add(toInEdge);
 
                         needDeleteCfgNodeSet.add(outCfgNode);

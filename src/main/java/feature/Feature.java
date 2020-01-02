@@ -129,6 +129,10 @@ public class Feature {
             }
             CFGGraph methodCalleeCFGGraph = methodCFGGraphMap.get(methodCall.getCalleeMethod());
 
+            if (methodCalleeCFGGraph == null) {
+                continue;
+            }
+
             CFGNode entryNode = getEntry(methodCalleeCFGGraph);
             CFGNode exitNode = getExit(methodCalleeCFGGraph);
 
