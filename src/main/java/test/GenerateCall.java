@@ -30,7 +30,7 @@ public class GenerateCall {
 
         for (File sourceFile : fileList) {
 
-            if (!sourceFile.getAbsolutePath().equals("/mnt/share/CloneData/data/src/0/8.c")) {
+            if (!sourceFile.getAbsolutePath().contains("/mnt/share/CloneData/data/src/0/")) {
                 continue;
             }
             String subPath = Tool.getFolderAndFilePath(sourceFile);
@@ -100,8 +100,13 @@ public class GenerateCall {
                         break;
                     }
                 }
+                // remove some literal
                 CFGGraph cfgGraph = Tool.getCFGGraphOfSelectedMethod(methodList, selectedMethod);
-                File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(cfgGraph, featureCfgDotPath);
+
+                // remove redundant node
+                CFGGraph simplifyCfgGraph = Tool.simplifyCFGGraphOfAddedCallRelationship(cfgGraph);
+
+                File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(simplifyCfgGraph, featureCfgDotPath);
             } else {
                 // construct by call relationship
                 List<Feature> featureList = Feature.getFeatureFromMethodCallList(methodCallList);
@@ -109,11 +114,10 @@ public class GenerateCall {
                     Feature feature = featureList.get(i);
                     CFGGraph cfgGraph = Feature.generateCFGByFeature(feature, methodCFGGraphMap);
 
-                    Tool.simplifyCFGGraphOfAddedCallRelationship(cfgGraph);
-                    System.exit(0);
+                    CFGGraph simplifyCfgGraph = Tool.simplifyCFGGraphOfAddedCallRelationship(cfgGraph);
 
                     String featureCfgDotPath = PathConfig.FEATURE_CFG_FOLDER_PATH + File.separator + subPath + File.separator + i + ".dot";
-                    File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(cfgGraph, featureCfgDotPath);
+                    File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(simplifyCfgGraph, featureCfgDotPath);
                 }
             }
         }

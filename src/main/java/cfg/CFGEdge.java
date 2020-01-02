@@ -29,8 +29,8 @@ public class CFGEdge {
     @Override
     public String toString() {
         return "Edge id=" + id + System.getProperty("line.separator") +
-                "In=" + in + System.getProperty("line.separator") +
-                "Out=" + out + System.getProperty("line.separator");
+                "Out=" + out + System.getProperty("line.separator") +
+                "In=" + in + System.getProperty("line.separator");
     }
 
     public String getId() {

@@ -110,7 +110,6 @@ public class Feature {
             if (selectedCFGNode == null) {
                 continue;
             }
-            System.out.println(selectedCFGNode);
             needDeleteCFGNodeSet.add(selectedCFGNode);
 
             // in selected node

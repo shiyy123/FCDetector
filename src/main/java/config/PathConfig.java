@@ -36,7 +36,7 @@ public class PathConfig {
     public static String EMBEDDING_FUNC_HOPE_PATH = base + File.separator + "embedding_func_HOPE";
     public static String EMBEDDING_FEATURE_HOPE_PATH = base + File.separator + "embedding_feature_HOPE";
 
-    public static String FEATURE_CFG_DOT_FOLDER_PATH = base + File.separator + "feature_dot";
+    public static String FEATURE_CFG_DOT_FOLDER_PATH = base + File.separator + "feature_dot_img";
 
     public static String IDENT_EMBED_PATH = base + File.separator + "identEmbed";
     public static String CFG_EMBED_PATH = base + File.separator + "cfgEmbed";

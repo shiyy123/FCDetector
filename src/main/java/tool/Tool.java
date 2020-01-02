@@ -144,18 +144,21 @@ public class Tool {
             StringBuilder nodeLine = new StringBuilder();
             String formatNodeId = formatId(cfgNode.getId());
 
+            String code = cfgNode.getProperties().getOrDefault(CFGConfig.CODE_PROPERTY, "");
             String lineNum = cfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "");
             String columnNum = cfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "");
 
             nodeLine.append(formatNodeId).append(" ").append(" [label=\"").
-                    append(formatNodeId).append(PathConfig.LINE_SEP).
-                    append("code=").append(cfgNode.getProperties().getOrDefault(CFGConfig.CODE_PROPERTY, "").replace("\"", "\\\"")).append(PathConfig.LINE_SEP);
+                    append(formatNodeId).append(PathConfig.LINE_SEP);
 
+            if (code.length() > 0) {
+                nodeLine.append("code:").append(cfgNode.getProperties().getOrDefault(CFGConfig.CODE_PROPERTY, "").replace("\"", "\\\"")).append(PathConfig.LINE_SEP);
+            }
             if (lineNum.length() > 0) {
-                nodeLine.append("lineNum=").append(cfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "")).append(PathConfig.LINE_SEP);
+                nodeLine.append("lineNum:").append(cfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "")).append(PathConfig.LINE_SEP);
             }
             if (columnNum.length() > 0) {
-                nodeLine.append("columnNum=").append(cfgNode.getProperties().getOrDefault(CFGConfig.COLUMN_NUMBER_PROPERTY, "")).append(PathConfig.LINE_SEP);
+                nodeLine.append("columnNum:").append(cfgNode.getProperties().getOrDefault(CFGConfig.COLUMN_NUMBER_PROPERTY, "")).append(PathConfig.LINE_SEP);
             }
             nodeLine.append("\"];");
 
@@ -388,8 +391,10 @@ public class Tool {
         Set<CFGNode> cfgNodeSet = cfgGraph.getCfgNodeSet();
         Set<CFGEdge> cfgEdgeSet = cfgGraph.getPureCFGEdgeSet();
 
-        Set<CFGNode> simplifyCfgNodeSet = new HashSet<>();
-        Set<CFGEdge> simplifyCfgEdgeSet = new HashSet<>();
+        Set<CFGNode> needDeleteCfgNodeSet = new HashSet<>();
+        Set<CFGEdge> needDeleteCfgEdgeSet = new HashSet<>();
+
+        Set<CFGEdge> needAddedCfgEdgeSet = new HashSet<>();
 
         Map<String, CFGNode> id2CFGNode = new HashMap<>();
         for (CFGNode cfgNode : cfgNodeSet) {
@@ -408,12 +413,94 @@ public class Tool {
                 String inCode = inCfgNode.getProperties().getOrDefault(CFGConfig.CODE_PROPERTY, "");
                 String outCode = outCfgNode.getProperties().getOrDefault(CFGConfig.CODE_PROPERTY, "");
 
-                int inLineNum = Integer.parseInt(inCfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "some(-1)"));
-                int outLineNum = Integer.parseInt(outCfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "some(-1)"));
+                int inLineNum = Integer.parseInt(inCfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "-1"));
+                int outLineNum = Integer.parseInt(outCfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "-1"));
+
+                if (inCode.contains(outCode) && inLineNum == outLineNum && inLineNum != -1) {
+                    int cnt1 = 0, cnt2 = 0;
+                    CFGEdge toOutEdge = null, toInEdge = null;
+                    for (CFGEdge edge : cfgEdgeSet) {
+                        if (edge.getIn().equals(inCfgNode.getId())) {
+                            toInEdge = edge;
+                            cnt1++;
+                        }
+                        if (edge.getIn().equals(outCfgNode.getId())) {
+                            toOutEdge = edge;
+                            cnt2++;
+                        }
+                    }
+
+
+                    if (cnt1 == 1 && cnt2 == 1) {
+                        CFGNode outOutCfgNode = id2CFGNode.get(toOutEdge.getOut());
+                        String outOutCode = outOutCfgNode.getProperties().getOrDefault(CFGConfig.CODE_PROPERTY, "");
+                        int outOutLineNum = Integer.parseInt(outOutCfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "-1"));
+
+                        if (inCode.contains(outOutCode) && inLineNum == outOutLineNum) {
+
+                            needDeleteCfgEdgeSet.add(toOutEdge);
+                            needDeleteCfgEdgeSet.add(toInEdge);
+
+                            needDeleteCfgNodeSet.add(outCfgNode);
+                            needDeleteCfgNodeSet.add(outOutCfgNode);
+
+                            List<CFGNode> outCfgNodeList = new ArrayList<>();
+                            List<CFGNode> inCfgNodeList = new ArrayList<>();
+
+                            for (CFGEdge edge : cfgEdgeSet) {
+                                if (edge.getIn().equals(toOutEdge.getOut())) {
+                                    outCfgNodeList.add(id2CFGNode.get(edge.getOut()));
+                                    needDeleteCfgEdgeSet.add(edge);
+                                }
+
+                                if (edge.getOut().equals(toInEdge.getIn())) {
+                                    inCfgNodeList.add(id2CFGNode.get(edge.getIn()));
+                                }
+                            }
+                            for (CFGNode cfgNode : outCfgNodeList) {
+                                needAddedCfgEdgeSet.add(new CFGEdge(inCfgNode.getId(), cfgNode.getId()));
+                            }
+                        }
+                    }
+                    if (cnt1 == 1) {
+                        needDeleteCfgEdgeSet.add(toInEdge);
+
+                        needDeleteCfgNodeSet.add(outCfgNode);
+
+                        List<CFGNode> outCfgNodeList = new ArrayList<>();
+
+                        for (CFGEdge edge : cfgEdgeSet) {
+                            if (edge.getIn().equals(toInEdge.getOut())) {
+                                outCfgNodeList.add(id2CFGNode.get(edge.getOut()));
+                                needDeleteCfgEdgeSet.add(edge);
+                            }
+                        }
+
+                        for (CFGNode cfgNode : outCfgNodeList) {
+                            needAddedCfgEdgeSet.add(new CFGEdge(inCfgNode.getId(), cfgNode.getId()));
+                        }
+                    }
+                }
             }
         }
 
+        Set<CFGNode> simplifyCfgNodeSet = new HashSet<>();
+        Set<CFGEdge> simplifyCfgEdgeSet = new HashSet<>();
 
-        return new CFGGraph();
+        for (CFGNode cfgNode : cfgNodeSet) {
+            if (!needDeleteCfgNodeSet.contains(cfgNode)) {
+                simplifyCfgNodeSet.add(cfgNode);
+            }
+        }
+
+        for (CFGEdge cfgEdge : cfgEdgeSet) {
+            if (!needDeleteCfgEdgeSet.contains(cfgEdge)) {
+                simplifyCfgEdgeSet.add(cfgEdge);
+            }
+        }
+
+        simplifyCfgEdgeSet.addAll(needAddedCfgEdgeSet);
+
+        return new CFGGraph(simplifyCfgNodeSet, simplifyCfgEdgeSet);
     }
 }
