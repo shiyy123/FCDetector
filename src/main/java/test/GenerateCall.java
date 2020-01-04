@@ -9,12 +9,13 @@ import joern.CPG;
 import method.Method;
 import method.MethodCall;
 import method.MethodInfo;
+import org.apache.commons.io.FileUtils;
 import tool.Tool;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * @author cary.shi on 2019/12/26
@@ -28,13 +29,20 @@ public class GenerateCall {
 //        List<File> fileList = Tool.getSourceFilesFromPath("G:\\share\\CloneData\\data\\src");
         List<File> fileList = Tool.getSourceFilesFromPath("/mnt/share/CloneData/data/src");
 
+        // for save graph json file
+        int index = 0;
+//        Map<String, String> cfgDotFilePath2graphJsonFilePath = new HashMap<>();
+        List<String> dot2cfgPath = new ArrayList<>();
+        List<String> dot2astPath = new ArrayList<>();
+
         for (File sourceFile : fileList) {
 
             System.out.println(sourceFile.getAbsolutePath());
 
-//            if (!sourceFile.getAbsolutePath().contains("/mnt/share/CloneData/data/src/0/")) {
+//            if (!sourceFile.getAbsolutePath().contains("/mnt/share/CloneData/data/src/1/106.cpp")) {
 //                continue;
 //            }
+
             String subPath = Tool.getFolderAndFilePath(sourceFile);
 
 //            String s = PathConfig.FEATURE_CFG_FOLDER_PATH + File.separator + subPath;
@@ -102,29 +110,88 @@ public class GenerateCall {
                         break;
                     }
                 }
+
+                assert selectedMethod != null;
+                String astString = Tool.traverseAST(selectedMethod.getAst());
+                File astContentFile = new File(PathConfig.FEATURE_AST_FOLDER_PATH + File.separator + index + ".txt");
+                if (astContentFile.exists()) {
+                    astContentFile.delete();
+                }
+                try {
+                    FileUtils.write(astContentFile, astString, StandardCharsets.UTF_8, true);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+//                System.out.println(astString);
+
                 // remove some literal
                 CFGGraph cfgGraph = Tool.getCFGGraphOfSelectedMethod(methodList, selectedMethod);
 
-                Tool.constructCFGDotFileOfCFGGraph(cfgGraph, "/home/cary/Documents/a.dot");
+//                Tool.constructCFGDotFileOfCFGGraph(cfgGraph, "/home/cary/Documents/a.dot");
 
                 // remove redundant node
                 CFGGraph simplifyCfgGraph = Tool.simplifyCFGGraphOfAddedCallRelationship(cfgGraph);
 
+                File graphJsonFile = Tool.generateGraphFile(simplifyCfgGraph, PathConfig.GRAPH_DATASET_FOLDER_PATH + File.separator + index + ".json");
+                index++;
+
                 File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(simplifyCfgGraph, featureCfgDotPath);
+
+                dot2cfgPath.add(cfgDotFile.getAbsolutePath() + " " + graphJsonFile.getAbsolutePath());
+//                cfgDotFilePath2graphJsonFilePath.put(cfgDotFile.getAbsolutePath(), graphJsonFile.getAbsolutePath());
 
             } else {
                 // construct by call relationship
                 List<Feature> featureList = Feature.getFeatureFromMethodCallList(methodCallList);
                 for (int i = 0; i < featureList.size(); i++) {
                     Feature feature = featureList.get(i);
+
+                    String astString = Tool.traverseAST(feature);
+                    File astContentFile = new File(PathConfig.FEATURE_AST_FOLDER_PATH + File.separator + index + ".txt");
+                    if (astContentFile.exists()) {
+                        astContentFile.delete();
+                    }
+                    try {
+                        FileUtils.write(astContentFile, astString, StandardCharsets.UTF_8, true);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     CFGGraph cfgGraph = Feature.generateCFGByFeature(feature, methodCFGGraphMap);
 
                     CFGGraph simplifyCfgGraph = Tool.simplifyCFGGraphOfAddedCallRelationship(cfgGraph);
 
+                    File graphJsonFile = Tool.generateGraphFile(simplifyCfgGraph, PathConfig.GRAPH_DATASET_FOLDER_PATH + File.separator + index + ".json");
+                    index++;
+
                     String featureCfgDotPath = PathConfig.FEATURE_CFG_FOLDER_PATH + File.separator + subPath + File.separator + i + ".dot";
                     File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(simplifyCfgGraph, featureCfgDotPath);
+
+                    dot2cfgPath.add(cfgDotFile.getAbsolutePath() + " " + graphJsonFile.getAbsolutePath());
+//                    cfgDotFilePath2graphJsonFilePath.put(cfgDotFile.getAbsolutePath(), graphJsonFile.getAbsolutePath());
                 }
             }
         }
+
+        File cfgDotFilePath2graphJsonFile = new File(PathConfig.base + File.separator + "dot2cfg.txt");
+
+        if (cfgDotFilePath2graphJsonFile.exists()) {
+            cfgDotFilePath2graphJsonFile.delete();
+        }
+
+        try {
+            FileUtils.writeLines(cfgDotFilePath2graphJsonFile, dot2cfgPath, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        File dotFile2astContentFile = new File(PathConfig.base + File.separator + "dot2ast.txt");
+
+        if (dotFile2astContentFile.exists()) {
+            dotFile2astContentFile.delete();
+        }
+
+
     }
 }

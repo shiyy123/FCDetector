@@ -1,5 +1,7 @@
 package ast;
 
+import config.CFGConfig;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,18 @@ public class ASTNode {
         this.id = id;
         this.edges = edges;
         this.propertyMap = propertyMap;
+    }
+
+    @Override
+    public String toString() {
+        return "ASTNode[id=" + this.id +
+                "\n,edges=" + this.edges +
+                "\n,propertyMap" + this.propertyMap +
+                "]\n";
+    }
+
+    public boolean isMethodNode() {
+        return !this.id.contains(CFGConfig.METHOD_RETURN) && this.id.contains(CFGConfig.METHOD);
     }
 
     public String getId() {

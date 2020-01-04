@@ -1,14 +1,21 @@
 package tool;
 
+import ast.AST;
+import ast.ASTEdge;
+import ast.ASTNode;
 import cfg.CFG;
 import cfg.CFGEdge;
 import cfg.CFGGraph;
 import cfg.CFGNode;
 import config.CFGConfig;
 import config.PathConfig;
+import feature.Feature;
 import method.Method;
+import method.MethodCall;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import process.ProcessExecutorList;
 
 import java.io.File;
@@ -508,5 +515,140 @@ public class Tool {
         simplifyCfgEdgeSet.addAll(needAddedCfgEdgeSet);
 
         return new CFGGraph(simplifyCfgNodeSet, simplifyCfgEdgeSet);
+    }
+
+    /**
+     * Prepare file data for graph2vec
+     */
+    public static File generateGraphFile(CFGGraph cfgGraph, String graphFilePath) {
+        File graphFile = new File(graphFilePath);
+        if (graphFile.exists()) {
+            graphFile.delete();
+        }
+
+        Set<CFGNode> cfgNodeSet = cfgGraph.getCfgNodeSet();
+        Set<CFGEdge> cfgEdgeSet = cfgGraph.getPureCFGEdgeSet();
+
+//        cfgNodeSet.forEach(System.out::println);
+        //io.shiftleft.codepropertygraph.generated.nodes.Call@4d
+
+        Map<CFGNode, Integer> node2index = new HashMap<>();
+        Map<String, CFGNode> id2node = new HashMap<>();
+
+        int cur = 0;
+        for (CFGNode cfgNode : cfgNodeSet) {
+            node2index.put(cfgNode, cur);
+            cur++;
+
+            id2node.put(cfgNode.getId(), cfgNode);
+        }
+
+        JSONObject graphJsonObject = new JSONObject();
+
+        Map<Integer, Integer> index2degree = new HashMap<>();
+
+        Set<Integer> indexSet = new HashSet<>();
+        JSONArray edgeJsonArray = new JSONArray();
+        for (CFGEdge cfgEdge : cfgEdgeSet) {
+
+            if (id2node.get(cfgEdge.getIn()) == null ||
+                    id2node.get(cfgEdge.getOut()) == null) {
+                continue;
+            }
+
+            int inIndex = node2index.get(id2node.get(cfgEdge.getIn()));
+            int outIndex = node2index.get(id2node.get(cfgEdge.getOut()));
+
+            indexSet.add(inIndex);
+            indexSet.add(outIndex);
+
+            index2degree.put(inIndex, index2degree.getOrDefault(inIndex, 0) + 1);
+            index2degree.put(outIndex, index2degree.getOrDefault(outIndex, 0) + 1);
+
+            JSONArray singleJsonArray = new JSONArray();
+            singleJsonArray.put(inIndex);
+            singleJsonArray.put(outIndex);
+            edgeJsonArray.put(singleJsonArray);
+        }
+        graphJsonObject.put("edges", edgeJsonArray);
+
+        JSONObject featureJsonObject = new JSONObject();
+        for (Integer index : indexSet) {
+            featureJsonObject.put(index.toString(), index2degree.getOrDefault(index, 0).toString());
+        }
+
+        graphJsonObject.put("features", featureJsonObject);
+
+        try {
+            FileUtils.write(graphFile, graphJsonObject.toString(), StandardCharsets.UTF_8, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return graphFile;
+    }
+
+    private static void preOrderAST(ASTNode root, StringBuilder res, Map<ASTNode, List<ASTNode>> node2Children) {
+        if (root != null) {
+            res.append(root.getPropertyMap().getOrDefault(CFGConfig.CODE_PROPERTY, "")).append(" ");
+            List<ASTNode> children = node2Children.get(root);
+            if (children != null) {
+                for (ASTNode astNode : children) {
+                    preOrderAST(astNode, res, node2Children);
+                }
+            }
+        }
+    }
+
+    public static String traverseAST(Feature feature) {
+        StringBuilder sb = new StringBuilder();
+
+        Set<MethodCall> methodCallSet = feature.getMethodCallSet();
+        Set<Method> methodSet = new HashSet<>();
+        for (MethodCall methodCall : methodCallSet) {
+            methodSet.add(methodCall.getCalleeMethod());
+            methodSet.add(methodCall.getCallerMethod());
+        }
+        for (Method method : methodSet) {
+            sb.append(traverseAST(method.getAst())).append(" ");
+        }
+        return sb.toString().trim().replaceAll(" +", " ");
+    }
+
+    // traverse ast and get the data sequence
+    public static String traverseAST(AST ast) {
+        List<ASTNode> astNodeList = ast.getAstNodeList();
+
+        StringBuilder sb = new StringBuilder();
+
+        Map<String, ASTNode> id2Node = new HashMap<>();
+        for (ASTNode astNode : astNodeList) {
+            id2Node.put(astNode.getId(), astNode);
+        }
+
+        Map<ASTNode, List<ASTNode>> node2Children = new HashMap<>();
+        ASTNode root = null;
+
+        for (ASTNode astNode : astNodeList) {
+            String curId = astNode.getId();
+            if (astNode.isMethodNode()) {
+                root = astNode;
+            }
+            for (ASTEdge astEdge : astNode.getEdges()) {
+                if (astEdge.getOut().equals(curId)) {
+                    List<ASTNode> childrenASTNodeList = node2Children.getOrDefault(astNode, new ArrayList<>());
+                    childrenASTNodeList.add(id2Node.get(astEdge.getIn()));
+                    node2Children.put(astNode, childrenASTNodeList);
+                }
+            }
+        }
+
+        if (root == null) {
+            return sb.toString();
+        }
+
+        preOrderAST(root, sb, node2Children);
+
+        return sb.toString().trim().replaceAll(" +", " ");
     }
 }

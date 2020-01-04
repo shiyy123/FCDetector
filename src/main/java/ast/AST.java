@@ -1,5 +1,6 @@
 package ast;
 
+import config.CFGConfig;
 import config.PathConfig;
 import method.Method;
 import method.MethodInfo;
@@ -47,6 +48,9 @@ public class AST {
             String funcId = funcJson.getString("id");
             JSONArray astJsonArray = funcJson.getJSONArray("AST");
 
+            // method node's edge list
+            List<ASTEdge> methodNodeEdgeList = new ArrayList<>();
+
             List<ASTNode> astNodeList = new ArrayList<>();
             for (int j = 0; j < astJsonArray.length(); j++) {
 
@@ -61,6 +65,11 @@ public class AST {
                     String edgeOut = astEdgeJsonObject.getString("out");
                     ASTEdge edge = new ASTEdge(edgeId, edgeIn, edgeOut);
                     edgeList.add(edge);
+
+                    // add method node's edge
+                    if (edgeIn.equals(funcId) || edgeOut.equals(funcId)) {
+                        methodNodeEdgeList.add(edge);
+                    }
                 }
 
                 Map<String, String> propertyMap = new HashMap<>();
@@ -75,6 +84,12 @@ public class AST {
                 ASTNode astNode = new ASTNode(astId, edgeList, propertyMap);
                 astNodeList.add(astNode);
             }
+
+            // add method node
+            Map<String, String> propertyMap = new HashMap<>();
+            propertyMap.put(CFGConfig.CODE_PROPERTY, funcName);
+            astNodeList.add(new ASTNode(funcId, methodNodeEdgeList, propertyMap));
+
             AST ast = new AST(astNodeList);
             Method method = new Method(funcId, funcName, ast);
             methodList.add(method);

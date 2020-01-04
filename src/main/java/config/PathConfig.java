@@ -26,6 +26,9 @@ public class PathConfig {
     public static String AST_FOLDER_PATH = base + File.separator + "ast";
     public static String METHOD_INFO_FOLDER_PATH = base + File.separator + "methodInfo";
     public static String FUNC_FOLDER_PATH = base + File.separator + "func";
+    public static String GRAPH_DATASET_FOLDER_PATH = base + File.separator + "graph_dataset";
+    public static String FEATURE_AST_FOLDER_PATH = base + File.separator + "ast_content";
+
     public static String SINGLE_FUNC_PATH = base + File.separator + "func.txt";
     public static String FEATURE_FOLDER_PATH = base + File.separator + "feature";
     public static String FUNC_EDGE_PATH = base + File.separator + "func_edge";

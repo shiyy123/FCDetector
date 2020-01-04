@@ -15,6 +15,14 @@ public class ASTEdge {
         this.out = out;
     }
 
+    @Override
+    public String toString() {
+        return "edges[id=" + this.id +
+                "\n,out=" + this.out +
+                "\n,in=" + this.in +
+                "]\n";
+    }
+
     public String getId() {
         return id;
     }
