@@ -29,6 +29,11 @@ public class PathConfig {
     public static String GRAPH_DATASET_FOLDER_PATH = base + File.separator + "graph_dataset";
     public static String FEATURE_AST_FOLDER_PATH = base + File.separator + "ast_content";
 
+    public static String SYNTAX_FEATURE_FOLDER_PATH = base + File.separator + "syntax_feature";
+    public static String SEMANTIC_FEATURE_FOLDER_PATH = base + File.separator + "semantic_feature";
+
+    public static String TRAINING_DATA_FOLDER = base + File.separator + "training";
+
     public static String SINGLE_FUNC_PATH = base + File.separator + "func.txt";
     public static String FEATURE_FOLDER_PATH = base + File.separator + "feature";
     public static String FUNC_EDGE_PATH = base + File.separator + "func_edge";

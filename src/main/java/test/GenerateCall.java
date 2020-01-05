@@ -139,6 +139,7 @@ public class GenerateCall {
                 File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(simplifyCfgGraph, featureCfgDotPath);
 
                 dot2cfgPath.add(cfgDotFile.getAbsolutePath() + " " + graphJsonFile.getAbsolutePath());
+                dot2astPath.add(cfgDotFile.getAbsolutePath() + " " + astContentFile.getAbsolutePath());
 //                cfgDotFilePath2graphJsonFilePath.put(cfgDotFile.getAbsolutePath(), graphJsonFile.getAbsolutePath());
 
             } else {
@@ -169,29 +170,32 @@ public class GenerateCall {
                     File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(simplifyCfgGraph, featureCfgDotPath);
 
                     dot2cfgPath.add(cfgDotFile.getAbsolutePath() + " " + graphJsonFile.getAbsolutePath());
+                    dot2astPath.add(cfgDotFile.getAbsolutePath() + " " + astContentFile.getAbsolutePath());
 //                    cfgDotFilePath2graphJsonFilePath.put(cfgDotFile.getAbsolutePath(), graphJsonFile.getAbsolutePath());
                 }
             }
         }
 
+        // save dot2cfg map
         File cfgDotFilePath2graphJsonFile = new File(PathConfig.base + File.separator + "dot2cfg.txt");
-
         if (cfgDotFilePath2graphJsonFile.exists()) {
             cfgDotFilePath2graphJsonFile.delete();
         }
-
         try {
             FileUtils.writeLines(cfgDotFilePath2graphJsonFile, dot2cfgPath, true);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        // save dot2ast map
         File dotFile2astContentFile = new File(PathConfig.base + File.separator + "dot2ast.txt");
-
         if (dotFile2astContentFile.exists()) {
             dotFile2astContentFile.delete();
         }
-
-
+        try {
+            FileUtils.writeLines(dotFile2astContentFile, dot2astPath, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

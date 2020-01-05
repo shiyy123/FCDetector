@@ -20,6 +20,8 @@ import process.ProcessExecutorList;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -650,5 +652,93 @@ public class Tool {
         preOrderAST(root, sb, node2Children);
 
         return sb.toString().trim().replaceAll(" +", " ");
+    }
+
+    public static Map<String, List<Double>> getIdentifier2Vec(File word2vecFile) {
+        Map<String, List<Double>> identifier2Vec = new HashMap<>();
+        try {
+            List<String> contentList = FileUtils.readLines(word2vecFile, StandardCharsets.UTF_8);
+            for (int i = 1; i < contentList.size(); i++) {
+                String content = contentList.get(i);
+                if (content.trim().isEmpty()) {
+                    continue;
+                }
+                String[] cols = content.split(" ");
+                List<Double> vec = new ArrayList<>();
+                for (int j = 1; j < cols.length; j++) {
+                    if (cols[j].trim().length() > 0) {
+                        vec.add(Double.parseDouble(cols[j]));
+                    }
+                }
+                identifier2Vec.put(cols[0], vec);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return identifier2Vec;
+    }
+
+    // /mnt/share/CloneData/data/feature_cfg/0/1/method.dot -> 0/1
+    public static String getSrcPath(File file) {
+        return file.getParentFile().getParentFile().getName() + File.separator + file.getParentFile().getName();
+    }
+
+    public static List<Double> getAstVecForFeature(String astIdentifiers, Map<String, List<Double>> identifier2Vec) {
+        String[] cols = astIdentifiers.split(" ");
+        List<Double> res = identifier2Vec.get(cols[0]);
+        for (int i = 1; i < cols.length; i++) {
+            List<Double> cur = identifier2Vec.get(cols[i]);
+            if (cur == null || cur.isEmpty()) {
+                continue;
+            }
+            for (int j = 0; j < res.size(); j++) {
+                res.set(j, res.get(j) + cur.get(j));
+            }
+        }
+        for (int i = 0; i < res.size(); i++) {
+            res.set(i, res.get(i) / cols.length);
+        }
+        return res;
+    }
+
+    public static List<Double> getCfgVecForFeature(File featureCsvFile, File cfgFile) {
+        List<Double> res = new ArrayList<>();
+        String id = cfgFile.getName().substring(0, cfgFile.getName().indexOf("."));
+
+        try {
+            List<String> lines = FileUtils.readLines(featureCsvFile, StandardCharsets.UTF_8);
+            for (int i = 1; i < lines.size(); i++) {
+                String[] cols = lines.get(i).split(",");
+                if (id.equals(cols[0])) {
+                    for (int j = 1; j < cols.length; j++) {
+                        res.add(Double.parseDouble(cols[j]));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    //[-0.24233099818229675, -0.40978747606277466, -0.1596420556306839, 0.147801011800766, 0.10527323186397552, -0.18085640668869019, -0.16109880805015564, 0.4755779504776001, 0.2085733264684677, -0.1569078415632248, -0.06173935905098915, -0.09034819155931473, 0.07120082527399063, -0.2028520554304123, -0.22904281318187714, 0.11911839991807938]
+    public static List<Double> getDoubleListFromFile(File file) {
+        List<Double> res = new ArrayList<>();
+        try {
+            String s = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+            String[] cols = s.substring(s.indexOf("[") + 1, s.indexOf("]")).split(",");
+            for (String col : cols) {
+                if (col.trim().length() == 0) {
+                    continue;
+                }
+                Double d = BigDecimal.valueOf(Double.parseDouble(col)).setScale(6, RoundingMode.HALF_UP).doubleValue();
+                res.add(d);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return res;
     }
 }
