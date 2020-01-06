@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import os
 import torch.nn.functional as F
+import sys
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -51,18 +52,21 @@ class Net(nn.Module):
 
 
 if __name__ == '__main__':
-    net = Net(n_feature=64, n_hidden1=10, n_hidden2=20, n_hidden3=30, n_hidden4=20, n_hidden5=10, n_output=2)
+    # net = Net(n_feature=64, n_hidden1=10, n_hidden2=20, n_hidden3=30, n_hidden4=20, n_hidden5=10, n_output=2)
+    net = Net(n_feature=64, n_hidden1=128, n_hidden2=256, n_hidden3=512, n_hidden4=256, n_hidden5=128, n_output=2)
+
     print(net)
     net.cuda()
     # optimize parameter
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.0001)
     # calculate loss
     loss_func = torch.nn.CrossEntropyLoss()
+    # loss_func = torch.nn.MSELoss()
 
     train_data, test_data, train_label, test_label = \
         get_data('G:\\share\\CloneData\\data\\training\\data.csv')
 
-    for epoch in range(10000):
+    for epoch in range(100000):
         out = net(train_data.cuda())
         loss = loss_func(out, train_label.cuda())
 
@@ -75,7 +79,27 @@ if __name__ == '__main__':
             pred_y = prediction.data.cpu().numpy()
             target_y = train_label.data.cpu().numpy()
             accuracy = float((pred_y == target_y).astype(int).sum()) / float(target_y.size)
-            print("accuracy=", accuracy)
+
+            tp = 0
+            tn = 0
+            fn = 0
+            fp = 0
+            for pred_id in range(len(pred_y)):
+                pred_cur = pred_y[pred_id]
+                target_cur = target_y[pred_id]
+                if (1 == pred_cur) and (1 == target_cur):
+                    tp += 1
+                if (0 == pred_cur) and (0 == target_cur):
+                    tn += 1
+                if (0 == pred_cur) and (1 == target_cur):
+                    fn += 1
+                if (1 == pred_cur) and (0 == target_cur):
+                    fp += 1
+            if tp + fp != 0 and tp + fn != 0:
+                precision = tp / float(tp + fp)
+                recall = tp / float(tp + fn)
+                F1 = 2 * precision * recall / (precision + recall)
+                print("precision=", precision, "recall=", recall, "F1=", F1, "accuracy=", accuracy)
 
     torch.save(net.state_dict(), 'checkpoint.pth')
     out = net(test_data.cuda())
@@ -83,8 +107,27 @@ if __name__ == '__main__':
 
     pred_y = prediction.data.cpu().numpy()
     target_y = test_label.data.cpu().numpy()
-    # print(pred_y)
-    # print(target_y)
 
     accuracy = float((pred_y == target_y).astype(int).sum()) / float(target_y.size)
-    print("accuracy=", accuracy)
+
+    tp = 0
+    tn = 0
+    fn = 0
+    fp = 0
+    for pred_id in range(len(pred_y)):
+        pred_cur = pred_y[pred_id]
+        target_cur = target_y[pred_id]
+        if (1 == pred_cur) and (1 == target_cur):
+            tp += 1
+        if (0 == pred_cur) and (0 == target_cur):
+            tn += 1
+        if (0 == pred_cur) and (1 == target_cur):
+            fn += 1
+        if (1 == pred_cur) and (0 == target_cur):
+            fp += 1
+
+    if tp + fp != 0 and tp + fn != 0:
+        precision = tp / float(tp + fp)
+        recall = tp / float(tp + fn)
+        F1 = 2 * precision * recall / (precision + recall)
+        print("precision=", precision, "recall=", recall, "F1=", F1, "accuracy=", accuracy)
