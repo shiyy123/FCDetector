@@ -3,7 +3,10 @@ package test;
 import ast.AST;
 import cfg.CFG;
 import cfg.CFGGraph;
+import config.CmdConfig;
 import config.PathConfig;
+import embedding.Graph2Vec;
+import embedding.Word2Vec;
 import joern.CPG;
 import method.Method;
 import method.MethodInfo;
@@ -18,49 +21,20 @@ import java.util.Map;
  */
 public class Test {
     public static void main(String[] args) {
-        String srcFolderPath = PathConfig.base + File.separator + "src";
-        File srcFolder = new File(srcFolderPath);
+        File cfgDotFilePath2graphJsonFile = new File(PathConfig.DOT2CFG_PATH);
+        File dotFile2astContentFile = new File(PathConfig.DOT2AST_PATH);
 
-        CPG cpg = new CPG();
-        cpg.generateCallForSourceFolder("/mnt/share/CloneData/data/src");
+        // generate ast corpus
+        File astCorpusFile = Word2Vec.generateAstCorpus(PathConfig.AST_CONTENT_FOLDER_PATH, PathConfig.AST_WORD2VEC_CORPUS_FILE_PATH);
+        // generate word2vec vectors for corpus
+        File word2vecOutFile = Word2Vec.generateWord2vecFile(astCorpusFile, PathConfig.AST_WORD2VEC_OUT_FILE_PATH, CmdConfig.WORD2VEC_CMD_PATH, 100);
+        // generate syntax feature, according to the folder structure
+        Word2Vec.generateSyntaxFeatureFiles(word2vecOutFile, dotFile2astContentFile);
 
-//        File cpgFile = cpg.getCPGFileBySourceFolder(srcFolder, PathConfig.CPG_PATH);
-//        System.out.println(cpgFile.getAbsolutePath());
-
-//        File methodInfoFile = cpg.getFuncInfoFileByCpgFile(cpgFile, PathConfig.FUNC_FILE_PATH);
-//        System.out.println(methodInfoFile.getAbsolutePath());
-        File methodInfoFile = new File(PathConfig.FUNC_FILE_PATH);
-
-//        File cfgFile = cpg.getCFGFileByCPGFile(cpgFile, PathConfig.CFG_FILE_PATH);
-//        System.out.println(cfgFile.getAbsolutePath());
-        File cfgFile = new File(PathConfig.CFG_FILE_PATH);
-
-//        File callFile = cpg.getCallFileByCPGFile(cpgFile, PathConfig.CALL_FILE_PATH);
-//        System.out.println(callFile.getAbsolutePath());
-        File callFile = new File(PathConfig.CALL_FILE_PATH);
-
-//        File pdgFile = cpg.getPDGFileByCPGFile(cpgFile, PathConfig.PDG_FILE_PATH);
-//        System.out.println(pdgFile.getAbsolutePath());
-
-//        File astFile = cpg.getASTFileByCPGFile(cpgFile, PathConfig.AST_FILE_PATH);
-//        System.out.println(astFile.getAbsolutePath());
-        File astFile = new File(PathConfig.AST_FILE_PATH);
-
-        CFG cfg = new CFG();
-        List<Method> cfgMethodList = cfg.getMethodCFGListFromCFGFile(cfgFile);
-
-        AST ast = new AST();
-        List<Method> astMethodList = ast.getMethodASTListFromASTFile(astFile);
-
-        Method method = new Method();
-        List<Method> methodList = method.mergeASTMethodListAndCFGMethodList(astMethodList, cfgMethodList);
-
-        // simplify cfg graph
-        CFGGraph cfgGraph = Tool.getCFGGraphOfSelectedMethod(methodList, methodList.get(2));
-//        File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(cfgGraph, "/mnt/share/CloneData/data/cfg2.dot");
-
-        Map<String, List<MethodInfo>> methodPath2MethodInfoList = MethodInfo.getMethodPath2MethodInfoByMethodInfoFile(methodInfoFile);
-        System.out.println(methodPath2MethodInfoList.size());
+        // generate graph2vec vectors for cfg
+        File graph2vecOutFile = Graph2Vec.generateGraph2VecFeatureFile(PathConfig.CFG_CONTENT_FOLDER_PATH, PathConfig.CFG_GRAPH2VEC_OUT_PATH, 16);
+        // generate semantic feature, according to the folder structure
+        Graph2Vec.generateSemanticFeatureFiles(graph2vecOutFile, cfgDotFilePath2graphJsonFile);
 
     }
 }

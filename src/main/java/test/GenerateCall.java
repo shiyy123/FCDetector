@@ -2,8 +2,10 @@ package test;
 
 import call.Call;
 import cfg.CFGGraph;
+import config.CmdConfig;
 import config.PathConfig;
-import feature.CallGraph;
+import embedding.Graph2Vec;
+import embedding.Word2Vec;
 import feature.Feature;
 import joern.CPG;
 import method.Method;
@@ -15,7 +17,10 @@ import tool.Tool;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author cary.shi on 2019/12/26
@@ -39,7 +44,7 @@ public class GenerateCall {
 
             System.out.println(sourceFile.getAbsolutePath());
 
-//            if (!sourceFile.getAbsolutePath().contains("/mnt/share/CloneData/data/src/1/106.cpp")) {
+//            if (!sourceFile.getAbsolutePath().contains("/mnt/share/CloneData/data/src/0")) {
 //                continue;
 //            }
 
@@ -113,7 +118,7 @@ public class GenerateCall {
 
                 assert selectedMethod != null;
                 String astString = Tool.traverseAST(selectedMethod.getAst());
-                File astContentFile = new File(PathConfig.FEATURE_AST_FOLDER_PATH + File.separator + index + ".txt");
+                File astContentFile = new File(PathConfig.AST_CONTENT_FOLDER_PATH + File.separator + index + ".txt");
                 if (astContentFile.exists()) {
                     astContentFile.delete();
                 }
@@ -133,7 +138,7 @@ public class GenerateCall {
                 // remove redundant node
                 CFGGraph simplifyCfgGraph = Tool.simplifyCFGGraphOfAddedCallRelationship(cfgGraph);
 
-                File graphJsonFile = Tool.generateGraphFile(simplifyCfgGraph, PathConfig.GRAPH_DATASET_FOLDER_PATH + File.separator + index + ".json");
+                File graphJsonFile = Tool.generateGraphFile(simplifyCfgGraph, PathConfig.CFG_CONTENT_FOLDER_PATH + File.separator + index + ".json");
                 index++;
 
                 File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(simplifyCfgGraph, featureCfgDotPath);
@@ -149,7 +154,7 @@ public class GenerateCall {
                     Feature feature = featureList.get(i);
 
                     String astString = Tool.traverseAST(feature);
-                    File astContentFile = new File(PathConfig.FEATURE_AST_FOLDER_PATH + File.separator + index + ".txt");
+                    File astContentFile = new File(PathConfig.AST_CONTENT_FOLDER_PATH + File.separator + index + ".txt");
                     if (astContentFile.exists()) {
                         astContentFile.delete();
                     }
@@ -163,7 +168,7 @@ public class GenerateCall {
 
                     CFGGraph simplifyCfgGraph = Tool.simplifyCFGGraphOfAddedCallRelationship(cfgGraph);
 
-                    File graphJsonFile = Tool.generateGraphFile(simplifyCfgGraph, PathConfig.GRAPH_DATASET_FOLDER_PATH + File.separator + index + ".json");
+                    File graphJsonFile = Tool.generateGraphFile(simplifyCfgGraph, PathConfig.CFG_CONTENT_FOLDER_PATH + File.separator + index + ".json");
                     index++;
 
                     String featureCfgDotPath = PathConfig.FEATURE_CFG_FOLDER_PATH + File.separator + subPath + File.separator + i + ".dot";
@@ -177,7 +182,7 @@ public class GenerateCall {
         }
 
         // save dot2cfg map
-        File cfgDotFilePath2graphJsonFile = new File(PathConfig.base + File.separator + "dot2cfg.txt");
+        File cfgDotFilePath2graphJsonFile = new File(PathConfig.DOT2CFG_PATH);
         if (cfgDotFilePath2graphJsonFile.exists()) {
             cfgDotFilePath2graphJsonFile.delete();
         }
@@ -188,7 +193,7 @@ public class GenerateCall {
         }
 
         // save dot2ast map
-        File dotFile2astContentFile = new File(PathConfig.base + File.separator + "dot2ast.txt");
+        File dotFile2astContentFile = new File(PathConfig.DOT2AST_PATH);
         if (dotFile2astContentFile.exists()) {
             dotFile2astContentFile.delete();
         }
@@ -197,5 +202,22 @@ public class GenerateCall {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // generate ast corpus
+        File astCorpusFile = Word2Vec.generateAstCorpus(PathConfig.AST_CONTENT_FOLDER_PATH, PathConfig.AST_WORD2VEC_CORPUS_FILE_PATH);
+        // generate word2vec vectors for corpus
+        File word2vecOutFile = Word2Vec.generateWord2vecFile(astCorpusFile, PathConfig.AST_WORD2VEC_OUT_FILE_PATH, CmdConfig.WORD2VEC_CMD_PATH, 16);
+        // generate syntax feature, according to the folder structure
+        Word2Vec.generateSyntaxFeatureFiles(word2vecOutFile, dotFile2astContentFile);
+
+        // generate graph2vec vectors for cfg
+        File graph2vecOutFile = Graph2Vec.generateGraph2VecFeatureFile(PathConfig.CFG_CONTENT_FOLDER_PATH, PathConfig.CFG_GRAPH2VEC_OUT_PATH, 16);
+        // generate semantic feature, according to the folder structure
+        Graph2Vec.generateSemanticFeatureFiles(graph2vecOutFile, cfgDotFilePath2graphJsonFile);
+
+//        System.exit(0);
+        File trainingDataFile = Tool.generateTrainingData(PathConfig.TRAINING_MERGE_DATA_FILE_PATH, PathConfig.TRAINING_SYNTAX_DATA_FILE_PATH,
+                PathConfig.TRAINING_SEMANTIC_DATA_FILE_PATH, PathConfig.SYNTAX_FEATURE_FOLDER_PATH, PathConfig.SEMANTIC_FEATURE_FOLDER_PATH);
+
     }
 }

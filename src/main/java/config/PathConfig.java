@@ -26,13 +26,27 @@ public class PathConfig {
     public static String AST_FOLDER_PATH = base + File.separator + "ast";
     public static String METHOD_INFO_FOLDER_PATH = base + File.separator + "methodInfo";
     public static String FUNC_FOLDER_PATH = base + File.separator + "func";
-    public static String GRAPH_DATASET_FOLDER_PATH = base + File.separator + "graph_dataset";
-    public static String FEATURE_AST_FOLDER_PATH = base + File.separator + "ast_content";
+    public static String CFG_CONTENT_FOLDER_PATH = base + File.separator + "cfg_content";
+    public static String AST_CONTENT_FOLDER_PATH = base + File.separator + "ast_content";
 
     public static String SYNTAX_FEATURE_FOLDER_PATH = base + File.separator + "syntax_feature";
     public static String SEMANTIC_FEATURE_FOLDER_PATH = base + File.separator + "semantic_feature";
 
     public static String TRAINING_DATA_FOLDER = base + File.separator + "training";
+    public static String TRAINING_MERGE_DATA_FILE_PATH = TRAINING_DATA_FOLDER + File.separator + "merge.csv";
+    public static String TRAINING_SYNTAX_DATA_FILE_PATH = TRAINING_DATA_FOLDER + File.separator + "syntax.csv";
+    public static String TRAINING_SEMANTIC_DATA_FILE_PATH = TRAINING_DATA_FOLDER + File.separator + "semantic.csv";
+
+    private static String AST_WORD2VEC_FOLDER_PATH = base + File.separator + "ast_word2vec";
+    public static String AST_WORD2VEC_CORPUS_FILE_PATH = AST_WORD2VEC_FOLDER_PATH + File.separator + "corpus.src";
+    public static String AST_WORD2VEC_OUT_FILE_PATH = AST_WORD2VEC_FOLDER_PATH + File.separator + "word2vec.out";
+
+    private static String CFG_GRAPH2VEC_FOLDER_PATH = base + File.separator + "cfg_graph2vec";
+    public static String CFG_GRAPH2VEC_OUT_PATH = CFG_GRAPH2VEC_FOLDER_PATH + File.separator + "graphFeature.csv";
+
+    private static String MAP_FOLDER_PATH = PathConfig.base + File.separator + "map";
+    public static String DOT2CFG_PATH = MAP_FOLDER_PATH + File.separator + "dot2cfg.txt";
+    public static String DOT2AST_PATH = MAP_FOLDER_PATH + File.separator + "dot2ast.txt";
 
     public static String SINGLE_FUNC_PATH = base + File.separator + "func.txt";
     public static String FEATURE_FOLDER_PATH = base + File.separator + "feature";
@@ -87,6 +101,21 @@ public class PathConfig {
         File featureCfgDotFolder = new File(FEATURE_CFG_DOT_FOLDER_PATH);
         if (!featureCfgDotFolder.exists()) {
             featureCfgDotFolder.mkdir();
+        }
+
+        File astCorpusFolder = new File(AST_WORD2VEC_FOLDER_PATH);
+        if (!astCorpusFolder.exists()) {
+            astCorpusFolder.mkdir();
+        }
+
+        File trainingDataFolder = new File(TRAINING_DATA_FOLDER);
+        if (!trainingDataFolder.exists()) {
+            trainingDataFolder.mkdir();
+        }
+
+        File mapFolder = new File(MAP_FOLDER_PATH);
+        if (!mapFolder.exists()) {
+            mapFolder.mkdir();
         }
     }
 }

@@ -4,7 +4,6 @@ import config.PathConfig;
 import org.apache.commons.io.FileUtils;
 import tool.Tool;
 
-import javax.sound.midi.Patch;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
