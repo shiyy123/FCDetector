@@ -7,6 +7,9 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/AutoenCODE" />
+      <excludeFolder url="file://$MODULE_DIR$/graph2vec" />
+      <excludeFolder url="file://$MODULE_DIR$/joern" />
       <excludeFolder url="file://$MODULE_DIR$/script" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
