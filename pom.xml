@@ -18,7 +18,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>test.GenerateCall</mainClass>
+                            <mainClass>test.GenerateTrainingData</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

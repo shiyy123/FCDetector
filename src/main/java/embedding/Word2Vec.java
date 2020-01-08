@@ -61,13 +61,10 @@ public class Word2Vec {
 
     // generate syntax feature
     public static void generateSyntaxFeatureFiles(File word2vecFile, File dot2astFile) {
-//        String word2vecPath = "/mnt/share/FCDetector/AutoenCODE/out/word2vec/word2vec.out";
-//        File word2vecFile = new File(word2vecPath);
+        // get the syntax feature vector for each identifier
         Map<String, List<Double>> identifier2Vec = Tool.getIdentifier2Vec(word2vecFile);
 
         // ast
-        Map<String, List<Double>> src2AstVec = new HashMap<>();
-//        File dot2astFile = new File("/mnt/share/CloneData/data/dot2ast.txt");
         List<String> dot2astList = null;
         try {
             dot2astList = FileUtils.readLines(dot2astFile, StandardCharsets.UTF_8);
@@ -80,6 +77,7 @@ public class Word2Vec {
             File dotFile = new File(line.split(" ")[0]);
             File astFile = new File(line.split(" ")[1]);
             String subPath = Tool.getSrcPath(dotFile);
+            String curName = dotFile.getName().substring(0, dotFile.getName().indexOf("."));
 
             String astIdentifiers = null;
             try {
@@ -89,15 +87,19 @@ public class Word2Vec {
             }
             assert astIdentifiers != null;
             List<Double> astVec = Tool.getAstVecForFeature(astIdentifiers, identifier2Vec);
-            subPath2AstVec.put(subPath, astVec);
+            subPath2AstVec.put(subPath + File.separator + curName, astVec);
         }
 
         for (Map.Entry<String, List<Double>> entry : subPath2AstVec.entrySet()) {
-            File syntaxFeatureFolder = new File(PathConfig.SYNTAX_FEATURE_FOLDER_PATH + File.separator + entry.getKey());
+            String subFolderPath = entry.getKey().substring(0, entry.getKey().lastIndexOf(File.separator));
+            String fileName = entry.getKey().substring(entry.getKey().lastIndexOf(File.separator) + 1);
+
+            String syntaxFeatureFolderPath = PathConfig.SYNTAX_FEATURE_FOLDER_PATH + File.separator + subFolderPath;
+            File syntaxFeatureFolder = new File(syntaxFeatureFolderPath);
             if (!syntaxFeatureFolder.exists()) {
                 syntaxFeatureFolder.mkdirs();
             }
-            File syntaxFeatureFile = new File(syntaxFeatureFolder.getAbsolutePath() + File.separator + "syntax.txt");
+            File syntaxFeatureFile = new File(syntaxFeatureFolder.getAbsolutePath() + File.separator + fileName + ".txt");
             if (syntaxFeatureFile.exists()) {
                 syntaxFeatureFile.delete();
             }

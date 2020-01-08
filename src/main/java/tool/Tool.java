@@ -749,6 +749,9 @@ public class Tool {
      * generate csv data for DNN model training, syntax and semantic feature
      * 1: similar
      * 0: not similar
+     * Because OJClone only has one function in one file, and we need to use this
+     * information to generate clone and not clone pair, so we can think one file
+     * only has one function
      */
     public static File generateTrainingData(String mergeTrainingCsvPath, String syntaxTrainingCsvPath, String semanticTrainingCsvPath,
                                             String syntaxFeatureFolderPath, String semanticFeatureFolderPath) {
@@ -789,9 +792,9 @@ public class Tool {
         for (File syntaxFolder : syntaxFolders) {
             String className = syntaxFolder.getName();
             for (File syntaxSubFolder : Objects.requireNonNull(syntaxFolder.listFiles())) {
-                File syntaxFile = new File(syntaxSubFolder.getAbsolutePath() + File.separator + "syntax.txt");
+                File syntaxFile = new File(syntaxSubFolder.getAbsolutePath() + File.separator + "0.txt");
                 String subPath = Tool.getSrcPath(syntaxFile);
-                File semanticFile = new File(semanticFeatureFolderPath + File.separator + subPath + File.separator + "semantic.txt");
+                File semanticFile = new File(semanticFeatureFolderPath + File.separator + subPath + File.separator + "0.txt");
 
                 List<File> syntaxFileList = class2SyntaxFileList.getOrDefault(className, new ArrayList<>());
                 syntaxFileList.add(syntaxFile);
@@ -822,24 +825,13 @@ public class Tool {
                     List<Double> syntaxVecRight = Tool.getDoubleListFromFile(syntaxFileList.get(j));
                     List<Double> semanticVecRight = Tool.getDoubleListFromFile(semanticFileList.get(j));
 
-                    int vecLen = syntaxVecLeft.size() + semanticVecLeft.size() + syntaxVecRight.size() + semanticVecRight.size() + 1;
-                    String[] line = new String[vecLen];
-                    int index = 0;
-                    for (Double d : syntaxVecLeft) {
-                        line[index++] = d.toString();
-                    }
-                    for (Double d : semanticVecLeft) {
-                        line[index++] = d.toString();
-                    }
-                    for (Double d : syntaxVecRight) {
-                        line[index++] = d.toString();
-                    }
-                    for (Double d : semanticVecRight) {
-                        line[index++] = d.toString();
-                    }
-                    line[index] = "1";
-                    assert mergeCsvWriter != null;
-                    mergeCsvWriter.writeNext(line);
+                    // write to merge csv
+                    writeToCsv(mergeCsvWriter, 1, syntaxVecLeft, syntaxVecRight, semanticVecLeft, semanticVecRight);
+
+                    // write to syntax
+                    writeToCsv(syntaxCsvWriter, 1, syntaxVecLeft, syntaxVecRight);
+                    // write to semantic
+                    writeToCsv(semanticCsvWriter, 1, semanticVecLeft, semanticVecRight);
                 }
             }
         }
@@ -884,24 +876,13 @@ public class Tool {
                         List<Double> syntaxVecRight = Tool.getDoubleListFromFile(syntaxFileListRight.get(l));
                         List<Double> semanticVecRight = Tool.getDoubleListFromFile(semanticFileListRight.get(l));
 
-                        int vecLen = syntaxVecLeft.size() + semanticVecLeft.size() + syntaxVecRight.size() + semanticVecRight.size() + 1;
-                        String[] line = new String[vecLen];
-                        int index = 0;
-                        for (Double d : syntaxVecLeft) {
-                            line[index++] = d.toString();
-                        }
-                        for (Double d : semanticVecLeft) {
-                            line[index++] = d.toString();
-                        }
-                        for (Double d : syntaxVecRight) {
-                            line[index++] = d.toString();
-                        }
-                        for (Double d : semanticVecRight) {
-                            line[index++] = d.toString();
-                        }
-                        line[index] = "0";
-                        assert mergeCsvWriter != null;
-                        mergeCsvWriter.writeNext(line);
+                        // write to merge csv
+                        writeToCsv(mergeCsvWriter, 0, syntaxVecLeft, syntaxVecRight, semanticVecLeft, semanticVecRight);
+
+                        // write to syntax
+                        writeToCsv(syntaxCsvWriter, 0, syntaxVecLeft, syntaxVecRight);
+                        // write to semantic
+                        writeToCsv(semanticCsvWriter, 0, semanticVecLeft, semanticVecRight);
                     }
                 }
 
@@ -916,5 +897,41 @@ public class Tool {
         }
 
         return trainingMergeCsvFile;
+    }
+
+    private static void writeToCsv(CSVWriter csvWriter, int similarOrNot, List<Double> syntaxVecLeft, List<Double> syntaxVecRight, List<Double> semanticVecLeft, List<Double> semanticVecRight) {
+        int vecLen = syntaxVecLeft.size() + semanticVecLeft.size() + syntaxVecRight.size() + semanticVecRight.size() + 1;
+        String[] line = new String[vecLen];
+        int index = 0;
+        for (Double d : syntaxVecLeft) {
+            line[index++] = d.toString();
+        }
+        for (Double d : semanticVecLeft) {
+            line[index++] = d.toString();
+        }
+        for (Double d : syntaxVecRight) {
+            line[index++] = d.toString();
+        }
+        for (Double d : semanticVecRight) {
+            line[index++] = d.toString();
+        }
+        line[index] = (similarOrNot + "");
+        assert csvWriter != null;
+        csvWriter.writeNext(line);
+    }
+
+    private static void writeToCsv(CSVWriter csvWriter, int similarOrNot, List<Double> vecLeft, List<Double> vecRight) {
+        int vecLen = vecLeft.size() + vecRight.size() + 1;
+        String[] line = new String[vecLen];
+        int index = 0;
+        for (Double d : vecLeft) {
+            line[index++] = d.toString();
+        }
+        for (Double d : vecRight) {
+            line[index++] = d.toString();
+        }
+        line[index] = (similarOrNot + "");
+        assert csvWriter != null;
+        csvWriter.writeNext(line);
     }
 }

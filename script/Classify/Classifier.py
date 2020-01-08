@@ -54,6 +54,7 @@ class Net(nn.Module):
 if __name__ == '__main__':
     # net = Net(n_feature=64, n_hidden1=10, n_hidden2=20, n_hidden3=30, n_hidden4=20, n_hidden5=10, n_output=2)
     net = Net(n_feature=64, n_hidden1=128, n_hidden2=256, n_hidden3=512, n_hidden4=256, n_hidden5=128, n_output=2)
+    # net = Net(n_feature=64, n_hidden1=32, n_hidden2=64, n_hidden3=128, n_hidden4=64, n_hidden5=32, n_output=2)
 
     print(net)
     net.cuda()
@@ -100,6 +101,8 @@ if __name__ == '__main__':
                 recall = tp / float(tp + fn)
                 F1 = 2 * precision * recall / (precision + recall)
                 print("precision=", precision, "recall=", recall, "F1=", F1, "accuracy=", accuracy)
+                if F1 > 0.9:
+                    torch.save(net.state_dict(), 'model/' + str(F1) + 'checkpoint.pth')
 
     torch.save(net.state_dict(), 'checkpoint.pth')
     out = net(test_data.cuda())

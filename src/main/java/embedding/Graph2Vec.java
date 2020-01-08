@@ -46,17 +46,22 @@ public class Graph2Vec {
             File dotFile = new File(line.split(" ")[0]);
             File cfgFile = new File(line.split(" ")[1]);
             String subPath = Tool.getSrcPath(dotFile);
+            String curName = dotFile.getName().substring(0, dotFile.getName().indexOf("."));
 
             List<Double> cfgVec = Tool.getCfgVecForFeature(featureCsvFile, cfgFile);
-            subPath2CfgVec.put(subPath, cfgVec);
+            subPath2CfgVec.put(subPath + File.separator + curName, cfgVec);
         }
 
         for (Map.Entry<String, List<Double>> entry : subPath2CfgVec.entrySet()) {
-            File semanticFeatureFolder = new File(PathConfig.SEMANTIC_FEATURE_FOLDER_PATH + File.separator + entry.getKey());
+            String subFolderPath = entry.getKey().substring(0, entry.getKey().lastIndexOf(File.separator));
+            String fileName = entry.getKey().substring(entry.getKey().lastIndexOf(File.separator) + 1);
+            String semanticFeatureFolderPath = PathConfig.SEMANTIC_FEATURE_FOLDER_PATH + File.separator + subFolderPath;
+
+            File semanticFeatureFolder = new File(semanticFeatureFolderPath);
             if (!semanticFeatureFolder.exists()) {
                 semanticFeatureFolder.mkdirs();
             }
-            File semanticFeatureFile = new File(semanticFeatureFolder.getAbsolutePath() + File.separator + "semantic.txt");
+            File semanticFeatureFile = new File(semanticFeatureFolder.getAbsolutePath() + File.separator + fileName + ".txt");
             if (semanticFeatureFile.exists()) {
                 semanticFeatureFile.delete();
             }

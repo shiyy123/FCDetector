@@ -28,6 +28,7 @@ public class PathConfig {
     public static String FUNC_FOLDER_PATH = base + File.separator + "func";
     public static String CFG_CONTENT_FOLDER_PATH = base + File.separator + "cfg_content";
     public static String AST_CONTENT_FOLDER_PATH = base + File.separator + "ast_content";
+    public static String METHOD_IN_FUNC_FOLDER_PATH = base + File.separator + "methodInFunc";
 
     public static String SYNTAX_FEATURE_FOLDER_PATH = base + File.separator + "syntax_feature";
     public static String SEMANTIC_FEATURE_FOLDER_PATH = base + File.separator + "semantic_feature";
@@ -116,6 +117,11 @@ public class PathConfig {
         File mapFolder = new File(MAP_FOLDER_PATH);
         if (!mapFolder.exists()) {
             mapFolder.mkdir();
+        }
+
+        File methodInFuncFolder = new File(METHOD_IN_FUNC_FOLDER_PATH);
+        if (!methodInFuncFolder.exists()) {
+            methodInFuncFolder.mkdir();
         }
     }
 }
