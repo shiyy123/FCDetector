@@ -7,12 +7,13 @@ import torch.nn.functional as F
 import sys
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+feature_len = 64
 
 
 def get_data(csv_path):
     csv_data = pd.read_csv(csv_path, sep=',', header=None)
-    data = csv_data.values.astype(np.float)[:, 0:64]
-    label = csv_data.values.astype(np.int)[:, 64:]
+    data = csv_data.values.astype(np.float)[:, 0:feature_len]
+    label = csv_data.values.astype(np.int)[:, feature_len:]
 
     total_data = np.hstack((data, label))
 
@@ -53,8 +54,10 @@ class Net(nn.Module):
 
 if __name__ == '__main__':
     # net = Net(n_feature=64, n_hidden1=10, n_hidden2=20, n_hidden3=30, n_hidden4=20, n_hidden5=10, n_output=2)
-    net = Net(n_feature=64, n_hidden1=128, n_hidden2=256, n_hidden3=512, n_hidden4=256, n_hidden5=128, n_output=2)
-    # net = Net(n_feature=64, n_hidden1=32, n_hidden2=64, n_hidden3=128, n_hidden4=64, n_hidden5=32, n_output=2)
+    net = Net(n_feature=feature_len, n_hidden1=128, n_hidden2=256, n_hidden3=512, n_hidden4=256, n_hidden5=128,
+              n_output=2)
+    # net = Net(n_feature=feature_len, n_hidden1=64, n_hidden2=128, n_hidden3=256, n_hidden4=128, n_hidden5=64,
+    # n_output=2)
 
     print(net)
     net.cuda()

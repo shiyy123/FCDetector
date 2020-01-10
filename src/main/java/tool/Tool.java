@@ -14,6 +14,7 @@ import config.PathConfig;
 import feature.Feature;
 import method.Method;
 import method.MethodCall;
+import method.MethodInfo;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -753,31 +754,66 @@ public class Tool {
      * information to generate clone and not clone pair, so we can think one file
      * only has one function
      */
-    public static File generateTrainingData(String mergeTrainingCsvPath, String syntaxTrainingCsvPath, String semanticTrainingCsvPath,
-                                            String syntaxFeatureFolderPath, String semanticFeatureFolderPath) {
+
+//    PathConfig.TRAINING_MERGE_DATA_FILE_PATH,
+//    PathConfig.TRAINING_TEXT_DATA_FILE_PATH, PathConfig.TRAINING_SYNTAX_DATA_FILE_PATH, PathConfig.TRAINING_SEMANTIC_DATA_FILE_PATH,
+//    PathConfig.TRAINING_TEXT_SYNTAX_DATA_FILE_PATH, PathConfig.TRAINING_TEXT_SEMANTIC_DATA_FILE_PATH, PathConfig.TRAINING_SYNTAX_SEMANTIC_DATA_FILE_PATH,
+//    PathConfig.SYNTAX_FEATURE_FOLDER_PATH, PathConfig.SEMANTIC_FEATURE_FOLDER_PATH, PathConfig.TEXT_FEATURE_FOLDER_PATH
+    public static void generateTrainingData(String mergeTrainingCsvPath,
+                                            String textTrainingCsvPath, String syntaxTrainingCsvPath, String semanticTrainingCsvPath,
+                                            String textSyntaxTrainingCsvPath, String textSemanticTrainingCsvPath, String syntaxSemanticTrainingCsvPath,
+                                            String textFeatureFolderPath, String syntaxFeatureFolderPath, String semanticFeatureFolderPath) {
 //        String trainingCsvPath = PathConfig.TRAINING_DATA_FOLDER + File.separator + "data.csv";
-        File trainingMergeCsvFile = new File(mergeTrainingCsvPath);
-        if (trainingMergeCsvFile.exists()) {
-            trainingMergeCsvFile.delete();
+        File mergeCsvFile = new File(mergeTrainingCsvPath);
+        if (mergeCsvFile.exists()) {
+            mergeCsvFile.delete();
         }
 
-        File trainingSyntaxCsvFile = new File(syntaxTrainingCsvPath);
-        if (trainingSyntaxCsvFile.exists()) {
-            trainingSyntaxCsvFile.delete();
+        File textCsvFile = new File(textTrainingCsvPath);
+        if (textCsvFile.exists()) {
+            mergeCsvFile.delete();
+        }
+        File syntaxCsvFile = new File(syntaxTrainingCsvPath);
+        if (syntaxCsvFile.exists()) {
+            syntaxCsvFile.delete();
+        }
+        File semanticCsvFile = new File(semanticTrainingCsvPath);
+        if (semanticCsvFile.exists()) {
+            semanticCsvFile.delete();
         }
 
-        File trainingSemanticCsvFile = new File(semanticTrainingCsvPath);
-        if (trainingSemanticCsvFile.exists()) {
-            trainingSemanticCsvFile.delete();
+        File textSyntaxCsvFile = new File(textSyntaxTrainingCsvPath);
+        if (textSyntaxCsvFile.exists()) {
+            textSyntaxCsvFile.delete();
+        }
+        File textSemanticCsvFile = new File(textSemanticTrainingCsvPath);
+        if (textSemanticCsvFile.exists()) {
+            textSemanticCsvFile.delete();
+        }
+        File syntaxSemanticCsvFile = new File(syntaxSemanticTrainingCsvPath);
+        if (syntaxSemanticCsvFile.exists()) {
+            syntaxSemanticCsvFile.delete();
         }
 
         CSVWriter mergeCsvWriter = null;
+        CSVWriter textCsvWriter = null;
         CSVWriter syntaxCsvWriter = null;
         CSVWriter semanticCsvWriter = null;
+        CSVWriter textSyntaxWriter = null;
+        CSVWriter textSemanticWriter = null;
+        CSVWriter syntaxSemanticWriter = null;
+
         try {
-            mergeCsvWriter = new CSVWriter(new FileWriter(trainingMergeCsvFile));
-            syntaxCsvWriter = new CSVWriter(new FileWriter(trainingSyntaxCsvFile));
-            semanticCsvWriter = new CSVWriter(new FileWriter(trainingSemanticCsvFile));
+            mergeCsvWriter = new CSVWriter(new FileWriter(mergeCsvFile));
+
+            textCsvWriter = new CSVWriter(new FileWriter(textCsvFile));
+            syntaxCsvWriter = new CSVWriter(new FileWriter(syntaxCsvFile));
+            semanticCsvWriter = new CSVWriter(new FileWriter(semanticCsvFile));
+
+            textSyntaxWriter = new CSVWriter(new FileWriter(textSyntaxCsvFile));
+            textSemanticWriter = new CSVWriter(new FileWriter(textSemanticCsvFile));
+            syntaxSemanticWriter = new CSVWriter(new FileWriter(syntaxSemanticCsvFile));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -786,6 +822,7 @@ public class Tool {
         File[] syntaxFolders = new File(syntaxFeatureFolderPath).listFiles();
         assert syntaxFolders != null;
 
+        Map<String, List<File>> class2TextFileList = new HashMap<>();
         Map<String, List<File>> class2SyntaxFileList = new HashMap<>();
         Map<String, List<File>> class2SemanticFileList = new HashMap<>();
 
@@ -794,7 +831,9 @@ public class Tool {
             for (File syntaxSubFolder : Objects.requireNonNull(syntaxFolder.listFiles())) {
                 File syntaxFile = new File(syntaxSubFolder.getAbsolutePath() + File.separator + "0.txt");
                 String subPath = Tool.getSrcPath(syntaxFile);
+
                 File semanticFile = new File(semanticFeatureFolderPath + File.separator + subPath + File.separator + "0.txt");
+                File textFile = new File(textFeatureFolderPath + File.separator + subPath + File.separator + "0.txt");
 
                 List<File> syntaxFileList = class2SyntaxFileList.getOrDefault(className, new ArrayList<>());
                 syntaxFileList.add(syntaxFile);
@@ -804,6 +843,9 @@ public class Tool {
                 semanticFileList.add(semanticFile);
                 class2SemanticFileList.put(className, semanticFileList);
 
+                List<File> textFileList = class2TextFileList.getOrDefault(className, new ArrayList<>());
+                textFileList.add(textFile);
+                class2TextFileList.put(className, textFileList);
             }
         }
 
@@ -814,20 +856,30 @@ public class Tool {
             classNameList.add(entry.getKey());
             List<File> syntaxFileList = entry.getValue();
             List<File> semanticFileList = class2SemanticFileList.get(entry.getKey());
+            List<File> textFileList = class2TextFileList.get(entry.getKey());
+
             int len = syntaxFileList.size();
 
             for (int i = 0; i < len; i++) {
                 for (int j = 0; j < len; j++) {
                     similarCnt++;
+                    List<Double> textVecLeft = Tool.getDoubleListFromFile(textFileList.get(i));
                     List<Double> syntaxVecLeft = Tool.getDoubleListFromFile(syntaxFileList.get(i));
                     List<Double> semanticVecLeft = Tool.getDoubleListFromFile(semanticFileList.get(i));
 
+                    List<Double> textVecRight = Tool.getDoubleListFromFile(textFileList.get(i));
                     List<Double> syntaxVecRight = Tool.getDoubleListFromFile(syntaxFileList.get(j));
                     List<Double> semanticVecRight = Tool.getDoubleListFromFile(semanticFileList.get(j));
 
                     // write to merge csv
-                    writeToCsv(mergeCsvWriter, 1, syntaxVecLeft, syntaxVecRight, semanticVecLeft, semanticVecRight);
+                    writeToCsv(mergeCsvWriter, 1, textVecLeft, syntaxVecLeft, semanticVecLeft, textVecRight, syntaxVecRight, semanticVecRight);
 
+                    writeToCsv(textSyntaxWriter, 1, textVecLeft, syntaxVecLeft, textVecRight, syntaxVecRight);
+                    writeToCsv(textSemanticWriter, 1, textVecLeft, semanticVecLeft, textVecRight, semanticVecRight);
+                    writeToCsv(syntaxSemanticWriter, 1, syntaxVecLeft, semanticVecLeft, syntaxVecRight, semanticVecRight);
+
+                    // write to text
+                    writeToCsv(textCsvWriter, 1, textVecLeft, textVecRight);
                     // write to syntax
                     writeToCsv(syntaxCsvWriter, 1, syntaxVecLeft, syntaxVecRight);
                     // write to semantic
@@ -847,9 +899,11 @@ public class Tool {
                 if (!flag) {
                     break;
                 }
+                List<File> textFileListLeft = class2TextFileList.get(classNameList.get(i));
                 List<File> syntaxFileListLeft = class2SyntaxFileList.get(classNameList.get(i));
                 List<File> semanticFileListLeft = class2SemanticFileList.get(classNameList.get(i));
 
+                List<File> textFileListRight = class2TextFileList.get(classNameList.get(j));
                 List<File> syntaxFileListRight = class2SyntaxFileList.get(classNameList.get(j));
                 List<File> semanticFileListRight = class2SemanticFileList.get(classNameList.get(j));
 
@@ -870,15 +924,22 @@ public class Tool {
                         }
                         notSimilarCnt++;
 
+                        List<Double> textVecLeft = Tool.getDoubleListFromFile(textFileListLeft.get(k));
                         List<Double> syntaxVecLeft = Tool.getDoubleListFromFile(syntaxFileListLeft.get(k));
                         List<Double> semanticVecLeft = Tool.getDoubleListFromFile(semanticFileListLeft.get(k));
 
+                        List<Double> textVecRight = Tool.getDoubleListFromFile(textFileListRight.get(l));
                         List<Double> syntaxVecRight = Tool.getDoubleListFromFile(syntaxFileListRight.get(l));
                         List<Double> semanticVecRight = Tool.getDoubleListFromFile(semanticFileListRight.get(l));
 
                         // write to merge csv
-                        writeToCsv(mergeCsvWriter, 0, syntaxVecLeft, syntaxVecRight, semanticVecLeft, semanticVecRight);
+                        writeToCsv(mergeCsvWriter, 0, textVecLeft, syntaxVecLeft, semanticVecLeft, textVecRight, syntaxVecRight, semanticVecRight);
 
+                        writeToCsv(textSyntaxWriter, 0, textVecLeft, syntaxVecLeft, textVecRight, syntaxVecRight);
+                        writeToCsv(textSemanticWriter, 0, textVecLeft, semanticVecLeft, textVecRight, semanticVecRight);
+                        writeToCsv(syntaxSemanticWriter, 0, syntaxVecLeft, semanticVecLeft, syntaxVecRight, semanticVecRight);
+
+                        writeToCsv(textCsvWriter, 0, textVecLeft, textVecRight);
                         // write to syntax
                         writeToCsv(syntaxCsvWriter, 0, syntaxVecLeft, syntaxVecRight);
                         // write to semantic
@@ -892,11 +953,52 @@ public class Tool {
         try {
             assert mergeCsvWriter != null;
             mergeCsvWriter.close();
+
+            assert textCsvWriter != null;
+            textCsvWriter.close();
+            assert syntaxCsvWriter != null;
+            syntaxCsvWriter.close();
+            assert semanticCsvWriter != null;
+            semanticCsvWriter.close();
+
+            assert textSyntaxWriter != null;
+            textSyntaxWriter.close();
+            assert textSemanticWriter != null;
+            textSemanticWriter.close();
+            assert syntaxSemanticWriter != null;
+            syntaxSemanticWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
-        return trainingMergeCsvFile;
+    private static void writeToCsv(CSVWriter csvWriter, int similarOrNot, List<Double> textVecLeft, List<Double> textVecRight,
+                                   List<Double> syntaxVecLeft, List<Double> syntaxVecRight, List<Double> semanticVecLeft, List<Double> semanticVecRight) {
+        int vecLen = textVecLeft.size() + syntaxVecLeft.size() + semanticVecLeft.size() +
+                textVecRight.size() + syntaxVecRight.size() + semanticVecRight.size() + 1;
+        String[] line = new String[vecLen];
+        int index = 0;
+        for (Double d : textVecLeft) {
+            line[index++] = d.toString();
+        }
+        for (Double d : syntaxVecLeft) {
+            line[index++] = d.toString();
+        }
+        for (Double d : semanticVecLeft) {
+            line[index++] = d.toString();
+        }
+        for (Double d : textVecRight) {
+            line[index++] = d.toString();
+        }
+        for (Double d : syntaxVecRight) {
+            line[index++] = d.toString();
+        }
+        for (Double d : semanticVecRight) {
+            line[index++] = d.toString();
+        }
+        line[index] = (similarOrNot + "");
+        assert csvWriter != null;
+        csvWriter.writeNext(line);
     }
 
     private static void writeToCsv(CSVWriter csvWriter, int similarOrNot, List<Double> syntaxVecLeft, List<Double> syntaxVecRight, List<Double> semanticVecLeft, List<Double> semanticVecRight) {
@@ -920,6 +1022,7 @@ public class Tool {
         csvWriter.writeNext(line);
     }
 
+    // write training data and label into the csv file
     private static void writeToCsv(CSVWriter csvWriter, int similarOrNot, List<Double> vecLeft, List<Double> vecRight) {
         int vecLen = vecLeft.size() + vecRight.size() + 1;
         String[] line = new String[vecLen];
@@ -933,5 +1036,55 @@ public class Tool {
         line[index] = (similarOrNot + "");
         assert csvWriter != null;
         csvWriter.writeNext(line);
+    }
+
+    /**
+     * remove comments in the source code
+     */
+    public static String removeComments(String prgm) {
+        int n = prgm.length();
+        StringBuilder res = new StringBuilder();
+        boolean s_cmt = false;
+        boolean m_cmt = false;
+
+        for (int i = 0; i < n; i++) {
+            if (s_cmt && prgm.charAt(i) == '\n') {
+                s_cmt = false;
+            } else if (m_cmt && prgm.charAt(i) == '*' && prgm.charAt(i + 1) == '/') {
+                m_cmt = false;
+                i++;
+            } else if (s_cmt || m_cmt) {
+                continue;
+            } else if (prgm.charAt(i) == '/' && prgm.charAt(i + 1) == '/') {
+                s_cmt = true;
+                i++;
+            } else if (prgm.charAt(i) == '/' && prgm.charAt(i + 1) == '*') {
+                m_cmt = true;
+                i++;
+            } else {
+                res.append(prgm.charAt(i));
+            }
+        }
+        return res.toString();
+    }
+
+    /**
+     * get specific text content from the method info
+     */
+    public static String getMethodInfoTextContent(MethodInfo methodInfo, File sourceFile) {
+        int startLine = methodInfo.getStartLine();
+        int endLine = methodInfo.getEndLine();
+
+        StringBuilder sb = new StringBuilder();
+        try {
+            List<String> contents = FileUtils.readLines(sourceFile, StandardCharsets.UTF_8);
+            for (int i = startLine - 1; i < endLine; i++) {
+                sb.append(contents.get(i));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Tool.removeComments(sb.toString()).replace("\n", "").replace("\r", "").
+                replaceAll("\t+", " ").replaceAll(" +", " ").trim();
     }
 }

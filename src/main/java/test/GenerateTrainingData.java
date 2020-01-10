@@ -37,6 +37,7 @@ public class GenerateTrainingData {
         // should not map file path to syntax and semantic feature
         List<String> dot2cfgPath = new ArrayList<>();
         List<String> dot2astPath = new ArrayList<>();
+        List<String> dot2textPath = new ArrayList<>();
 
         for (File sourceFile : fileList) {
 
@@ -122,6 +123,11 @@ public class GenerateTrainingData {
                     astContentFile.delete();
                 }
 
+                File textContentFile = new File(PathConfig.TEXT_CONTENT_FOLDER_PATH + File.separator + index + ".txt");
+                if (textContentFile.exists()) {
+                    textContentFile.delete();
+                }
+
                 // the relationship between methods and function
                 File methodInFuncFolder = new File(PathConfig.METHOD_IN_FUNC_FOLDER_PATH + File.separator + subPath);
                 if (!methodInFuncFolder.exists()) {
@@ -130,7 +136,13 @@ public class GenerateTrainingData {
                 File methodInFuncFile = new File(methodInFuncFolder.getAbsolutePath() + File.separator + "methodInFunc.txt");
                 String methodInFunc = "0:" + selectedMethod.getName();
                 try {
+                    // text code representation
+                    String srcContent = FileUtils.readFileToString(sourceFile, StandardCharsets.UTF_8);
+                    String textString = Tool.removeComments(srcContent);
+                    FileUtils.write(textContentFile, astString, StandardCharsets.UTF_8, true);
+                    // ast code representation
                     FileUtils.write(astContentFile, astString, StandardCharsets.UTF_8, true);
+                    // cfg code representation
                     FileUtils.write(methodInFuncFile, methodInFunc, StandardCharsets.UTF_8, true);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -149,6 +161,7 @@ public class GenerateTrainingData {
 
                 dot2cfgPath.add(cfgDotFile.getAbsolutePath() + " " + graphJsonFile.getAbsolutePath());
                 dot2astPath.add(cfgDotFile.getAbsolutePath() + " " + astContentFile.getAbsolutePath());
+                dot2textPath.add(cfgDotFile.getAbsolutePath() + " " + textContentFile.getAbsolutePath());
 //                cfgDotFilePath2graphJsonFilePath.put(cfgDotFile.getAbsolutePath(), graphJsonFile.getAbsolutePath());
 
             } else {
@@ -170,9 +183,17 @@ public class GenerateTrainingData {
                         astContentFile.delete();
                     }
 
+                    File textContentFile = new File(PathConfig.TEXT_CONTENT_FOLDER_PATH + File.separator + index + ".txt");
+                    if (textContentFile.exists()) {
+                        textContentFile.delete();
+                    }
+
+                    // write function and method relationship
                     StringBuilder methodInFunc = new StringBuilder();
                     methodInFunc.append(i).append(":");
                     Set<String> methodNameSet = new HashSet<>();
+                    Set<MethodInfo> methodInfoSet = new HashSet<>();
+
                     for (MethodCall methodCall : feature.getMethodCallSet()) {
                         if (!methodCall.getCallerMethod().getName().contains("<operator>")) {
                             methodNameSet.add(methodCall.getCallerMethod().getName());
@@ -180,14 +201,27 @@ public class GenerateTrainingData {
                         if (!methodCall.getCalleeMethod().getName().contains("<operator>")) {
                             methodNameSet.add(methodCall.getCalleeMethod().getName());
                         }
+                        if (methodCall.getCalleeMethodInfo() != null) {
+                            methodInfoSet.add(methodCall.getCalleeMethodInfo());
+                        }
+                        if (methodCall.getCallerMethodInfo() != null) {
+                            methodInfoSet.add(methodCall.getCallerMethodInfo());
+                        }
                     }
                     for (String name : methodNameSet) {
                         methodInFunc.append(name).append(",");
                     }
 
+                    StringBuilder textContent = new StringBuilder();
+                    // get content of feature
+                    for (MethodInfo methodInfo : methodInfoSet) {
+                        textContent.append(Tool.getMethodInfoTextContent(methodInfo, sourceFile)).append(" ");
+                    }
+
                     try {
                         FileUtils.write(astContentFile, astString, StandardCharsets.UTF_8, true);
                         FileUtils.write(methodInFuncFile, methodInFunc.toString() + PathConfig.LINE_SEP, StandardCharsets.UTF_8, true);
+                        FileUtils.write(textContentFile, textContent.toString().trim() + PathConfig.LINE_SEP, StandardCharsets.UTF_8, true);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -204,6 +238,7 @@ public class GenerateTrainingData {
 
                     dot2cfgPath.add(cfgDotFile.getAbsolutePath() + " " + graphJsonFile.getAbsolutePath());
                     dot2astPath.add(cfgDotFile.getAbsolutePath() + " " + astContentFile.getAbsolutePath());
+                    dot2textPath.add(cfgDotFile.getAbsolutePath() + " " + textContentFile.getAbsolutePath());
 //                    cfgDotFilePath2graphJsonFilePath.put(cfgDotFile.getAbsolutePath(), graphJsonFile.getAbsolutePath());
                 }
             }
@@ -231,19 +266,39 @@ public class GenerateTrainingData {
             e.printStackTrace();
         }
 
+        // save dot2text map
+        File dotFile2textContentFile = new File(PathConfig.DOT2TEXT_PATH);
+        if (dotFile2textContentFile.exists()) {
+            dotFile2textContentFile.delete();
+        }
+        try {
+            FileUtils.writeLines(dotFile2textContentFile, dot2textPath, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         // generate ast corpus
-        File astCorpusFile = Word2Vec.generateAstCorpus(PathConfig.AST_CONTENT_FOLDER_PATH, PathConfig.AST_WORD2VEC_CORPUS_FILE_PATH);
+        File astCorpusFile = Word2Vec.generateCorpusFromFolder(PathConfig.AST_CONTENT_FOLDER_PATH, PathConfig.AST_WORD2VEC_CORPUS_FILE_PATH);
         // generate word2vec vectors for corpus
         File word2vecOutFile = Word2Vec.generateWord2vecFile(astCorpusFile, PathConfig.AST_WORD2VEC_OUT_FILE_PATH, CmdConfig.WORD2VEC_CMD_PATH, 16);
         // generate syntax feature, according to the folder structure
-        Word2Vec.generateSyntaxFeatureFiles(word2vecOutFile, dotFile2astContentFile);
+        Word2Vec.generateSyntaxFeatureFiles(word2vecOutFile, dotFile2astContentFile, PathConfig.SYNTAX_FEATURE_FOLDER_PATH);
 
         // generate graph2vec vectors for cfg
         File graph2vecOutFile = Graph2Vec.generateGraph2VecFeatureFile(PathConfig.CFG_CONTENT_FOLDER_PATH, PathConfig.CFG_GRAPH2VEC_OUT_PATH, 16);
         // generate semantic feature, according to the folder structure
         Graph2Vec.generateSemanticFeatureFiles(graph2vecOutFile, cfgDotFilePath2graphJsonFile);
 
-        File trainingDataFile = Tool.generateTrainingData(PathConfig.TRAINING_MERGE_DATA_FILE_PATH, PathConfig.TRAINING_SYNTAX_DATA_FILE_PATH,
-                PathConfig.TRAINING_SEMANTIC_DATA_FILE_PATH, PathConfig.SYNTAX_FEATURE_FOLDER_PATH, PathConfig.SEMANTIC_FEATURE_FOLDER_PATH);
+        // generate text vectors
+        File textCorpusFile = Word2Vec.generateCorpusFromFolder(PathConfig.TEXT_CONTENT_FOLDER_PATH, PathConfig.TEXT_WORD2VEC_CORPUS_FILE_PATH);
+        // generate word2vec vectors for corpus
+        File textWord2vecOutFile = Word2Vec.generateWord2vecFile(textCorpusFile, PathConfig.TEXT_WORD2VEC_OUT_FILE_PATH, CmdConfig.WORD2VEC_CMD_PATH, 16);
+        // generate syntax feature
+        Word2Vec.generateSyntaxFeatureFiles(textWord2vecOutFile, dotFile2textContentFile, PathConfig.TEXT_FEATURE_FOLDER_PATH);
+
+        Tool.generateTrainingData(PathConfig.TRAINING_MERGE_DATA_FILE_PATH,
+                PathConfig.TRAINING_TEXT_DATA_FILE_PATH, PathConfig.TRAINING_SYNTAX_DATA_FILE_PATH, PathConfig.TRAINING_SEMANTIC_DATA_FILE_PATH,
+                PathConfig.TRAINING_TEXT_SYNTAX_DATA_FILE_PATH, PathConfig.TRAINING_TEXT_SEMANTIC_DATA_FILE_PATH, PathConfig.TRAINING_SYNTAX_SEMANTIC_DATA_FILE_PATH,
+                PathConfig.TEXT_FEATURE_FOLDER_PATH, PathConfig.SYNTAX_FEATURE_FOLDER_PATH, PathConfig.SEMANTIC_FEATURE_FOLDER_PATH);
     }
 }

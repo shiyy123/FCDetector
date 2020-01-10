@@ -19,7 +19,7 @@ public class Word2Vec {
     private final static Logger logger = LogManager.getLogger(Word2Vec.class);
 
     // generate ast corpus, save all ast content file in corpus file
-    public static File generateAstCorpus(String astContentFolderPath, String astContentFilePath) {
+    public static File generateCorpusFromFolder(String astContentFolderPath, String astContentFilePath) {
         File[] astContentFiles = new File(astContentFolderPath).listFiles();
         List<String> contentList = new ArrayList<>();
         assert astContentFiles != null;
@@ -43,6 +43,41 @@ public class Word2Vec {
         return astContentFile;
     }
 
+    /**
+     * generate corpus from the source code
+     */
+    public static File generateTextCorpus(String srcFolderPath, String textCorpusFilePath) {
+        File textCorpusFile = new File(textCorpusFilePath);
+        if (textCorpusFile.exists()) {
+            textCorpusFile.delete();
+        }
+
+        List<String> corpusContentList = new ArrayList<>();
+        File[] folders = new File(srcFolderPath).listFiles();
+        assert folders != null;
+        for (File folder : folders) {
+            for (File srcFile : Objects.requireNonNull(folder.listFiles())) {
+                try {
+                    String srcContent = FileUtils.readFileToString(srcFile, StandardCharsets.UTF_8);
+                    String simplifySrc = Tool.removeComments(srcContent).replace("\n", "").replace("\r", "").
+                            replaceAll("\t+", " ").replaceAll(" +", " ").trim();
+                    if (simplifySrc.trim().length() == 0) {
+                        continue;
+                    }
+                    corpusContentList.add(simplifySrc);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        try {
+            FileUtils.writeLines(textCorpusFile, corpusContentList, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return textCorpusFile;
+    }
+
     // generate word2vec out file
     public static File generateWord2vecFile(File corpusFile, String word2vecOutPath, String word2vecCmdPath, int length) {
         File word2vecOutFile = new File(word2vecOutPath);
@@ -60,7 +95,7 @@ public class Word2Vec {
     }
 
     // generate syntax feature
-    public static void generateSyntaxFeatureFiles(File word2vecFile, File dot2astFile) {
+    public static void generateSyntaxFeatureFiles(File word2vecFile, File dot2astFile, String saveFolderPath) {
         // get the syntax feature vector for each identifier
         Map<String, List<Double>> identifier2Vec = Tool.getIdentifier2Vec(word2vecFile);
 
@@ -94,7 +129,7 @@ public class Word2Vec {
             String subFolderPath = entry.getKey().substring(0, entry.getKey().lastIndexOf(File.separator));
             String fileName = entry.getKey().substring(entry.getKey().lastIndexOf(File.separator) + 1);
 
-            String syntaxFeatureFolderPath = PathConfig.SYNTAX_FEATURE_FOLDER_PATH + File.separator + subFolderPath;
+            String syntaxFeatureFolderPath = saveFolderPath + File.separator + subFolderPath;
             File syntaxFeatureFolder = new File(syntaxFeatureFolderPath);
             if (!syntaxFeatureFolder.exists()) {
                 syntaxFeatureFolder.mkdirs();
