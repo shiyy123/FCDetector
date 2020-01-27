@@ -7,7 +7,7 @@ import torch.nn.functional as F
 import sys
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-feature_len = 64
+feature_len = 32
 
 
 def get_data(csv_path):
@@ -54,7 +54,8 @@ class Net(nn.Module):
 
 if __name__ == '__main__':
     # net = Net(n_feature=64, n_hidden1=10, n_hidden2=20, n_hidden3=30, n_hidden4=20, n_hidden5=10, n_output=2)
-    net = Net(n_feature=feature_len, n_hidden1=128, n_hidden2=256, n_hidden3=512, n_hidden4=256, n_hidden5=128,
+    net = Net(n_feature=feature_len, n_hidden1=feature_len, n_hidden2=feature_len * 2, n_hidden3=feature_len * 4,
+              n_hidden4=feature_len * 2, n_hidden5=feature_len,
               n_output=2)
     # net = Net(n_feature=feature_len, n_hidden1=64, n_hidden2=128, n_hidden3=256, n_hidden4=128, n_hidden5=64,
     # n_output=2)
@@ -62,13 +63,15 @@ if __name__ == '__main__':
     print(net)
     net.cuda()
     # optimize parameter
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.0001)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
     # calculate loss
     loss_func = torch.nn.CrossEntropyLoss()
     # loss_func = torch.nn.MSELoss()
 
     train_data, test_data, train_label, test_label = \
-        get_data('G:\\share\\CloneData\\data\\training\\data.csv')
+        get_data('G:\\share\\CloneData\\data\\training\\text.csv')
+
+    record = open('record.txt', 'a+')
 
     for epoch in range(100000):
         out = net(train_data.cuda())
