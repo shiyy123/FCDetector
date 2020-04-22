@@ -417,54 +417,59 @@ public class PathConfig {
     public String GRAPH2VEC_SCRIPT_PATH;
 
     public void init() {
-        File propertyFolder = new File(CODE_PROPERTY_FOLDER);
+        File propertyFolder = new File(getCODE_PROPERTY_FOLDER());
         if (!propertyFolder.exists()) {
             propertyFolder.mkdir();
         }
 
-        File astFolder = new File(AST_FOLDER_PATH);
+        File astFolder = new File(getAST_FOLDER_PATH());
         if (!astFolder.exists()) {
             astFolder.mkdir();
         }
 
-        File cfgFolder = new File(CFG_FOLDER_PATH);
+        File cfgFolder = new File(getCFG_FOLDER_PATH());
         if (!cfgFolder.exists()) {
             cfgFolder.mkdir();
         }
 
-        File cpgFolder = new File(CPG_FOLDER_PATH);
+        File cpgFolder = new File(getCPG_FOLDER_PATH());
         if (!cpgFolder.exists()) {
             cpgFolder.mkdir();
         }
 
-        File featureCfgDotFolder = new File(FEATURE_CFG_DOT_FOLDER_PATH);
+        File featureCfgDotFolder = new File(getFEATURE_CFG_DOT_FOLDER_PATH());
         if (!featureCfgDotFolder.exists()) {
             featureCfgDotFolder.mkdir();
         }
 
-        File astCorpusFolder = new File(AST_WORD2VEC_FOLDER_PATH);
+        File astCorpusFolder = new File(getAST_WORD2VEC_FOLDER_PATH());
         if (!astCorpusFolder.exists()) {
             astCorpusFolder.mkdir();
         }
 
-        File trainingDataFolder = new File(TRAINING_DATA_FOLDER);
+        File trainingDataFolder = new File(getTRAINING_DATA_FOLDER());
         if (!trainingDataFolder.exists()) {
             trainingDataFolder.mkdir();
         }
 
-        File mapFolder = new File(MAP_FOLDER_PATH);
+        File mapFolder = new File(getMAP_FOLDER_PATH());
         if (!mapFolder.exists()) {
             mapFolder.mkdir();
         }
 
-        File methodInFuncFolder = new File(METHOD_IN_FUNC_FOLDER_PATH);
+        File methodInFuncFolder = new File(getMETHOD_IN_FUNC_FOLDER_PATH());
         if (!methodInFuncFolder.exists()) {
             methodInFuncFolder.mkdir();
         }
 
-        File textFeatureFolder = new File(TEXT_FEATURE_FOLDER_PATH);
+        File textFeatureFolder = new File(getTEXT_FEATURE_FOLDER_PATH());
         if (!textFeatureFolder.exists()) {
             textFeatureFolder.mkdir();
+        }
+
+        File cfgGraph2VecFolder = new File(getCFG_GRAPH2VEC_FOLDER_PATH());
+        if(!cfgGraph2VecFolder.exists()){
+            cfgGraph2VecFolder.mkdir();
         }
     }
 }

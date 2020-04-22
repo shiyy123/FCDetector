@@ -34,6 +34,8 @@ public class GenerateTrainingData {
         PathConfig.getInstance().setBase(basePath);
         PathConfig.getInstance().setROOT_PATH(rootPath);
 
+        PathConfig.getInstance().init();
+
         CPG cpg = new CPG();
         Method methodClass = new Method();
         Call callClass = new Call();
@@ -67,28 +69,28 @@ public class GenerateTrainingData {
 
             // get cpg
             String cpgPath = PathConfig.getInstance().getCPG_FOLDER_PATH() + File.separator + subPath + File.separator + "cpg.bin.zip";
-//            File cpgFile = cpg.getCPGFileBySourceFolder(sourceFile, cpgPath);
-            File cpgFile = new File(cpgPath);
+            File cpgFile = cpg.getCPGFileBySourceFolder(sourceFile, cpgPath);
+//            File cpgFile = new File(cpgPath);
 
             // get ast
             String astPath = PathConfig.getInstance().getAST_FOLDER_PATH() + File.separator + subPath + File.separator + "ast.dot";
-//            File astFile = cpg.getASTFileByCPGFile(cpgFile, astPath);
-            File astFile = new File(astPath);
+            File astFile = cpg.getASTFileByCPGFile(cpgFile, astPath);
+//            File astFile = new File(astPath);
 
             // get cfg
             String cfgPath = PathConfig.getInstance().getCFG_FOLDER_PATH() + File.separator + subPath + File.separator + "cfg.dot";
-//            File cfgFile = cpg.getCFGFileByCPGFile(cpgFile, cfgPath);
-            File cfgFile = new File(cfgPath);
+            File cfgFile = cpg.getCFGFileByCPGFile(cpgFile, cfgPath);
+//            File cfgFile = new File(cfgPath);
 
             // get method info
             String methodInfoPath = PathConfig.getInstance().getMETHOD_INFO_FOLDER_PATH() + File.separator + subPath + File.separator + "methodInfo.txt";
-//            File methodInfoFile = cpg.getMethodInfoFileByCpgFile(cpgFile, methodInfoPath);
-            File methodInfoFile = new File(methodInfoPath);
+            File methodInfoFile = cpg.getMethodInfoFileByCpgFile(cpgFile, methodInfoPath);
+//            File methodInfoFile = new File(methodInfoPath);
 
             // get call
             String callPath = PathConfig.getInstance().getCALL_FOLDER_PATH() + File.separator + subPath + File.separator + "call.txt";
-//            File callFile = cpg.getCallFileByCPGFile(cpgFile, callPath);
-            File callFile = new File(callPath);
+            File callFile = cpg.getCallFileByCPGFile(cpgFile, callPath);
+//            File callFile = new File(callPath);
 
             // get method info list, contain location, start line and end line, etc
             List<MethodInfo> methodInfoList = MethodInfo.getMethodInfoListByMethodInfoFile(methodInfoFile);

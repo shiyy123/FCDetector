@@ -6,4 +6,4 @@ texttable==1.5.0
 gensim==3.6.0
 networkx==2.4
 joblib==0.13.0
-logging==0.4.9.6
+logging==0.4.9.6r
