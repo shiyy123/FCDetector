@@ -3,6 +3,7 @@ package test;
 import call.Call;
 import cfg.CFGGraph;
 import config.CmdConfig;
+import config.Config;
 import config.PathConfig;
 import embedding.Graph2Vec;
 import embedding.Word2Vec;
@@ -17,6 +18,7 @@ import tool.Tool;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -24,6 +26,13 @@ import java.util.*;
  */
 public class GenerateTrainingData {
     public static void main(String[] args) {
+
+        String basePath = args[0];
+        String rootPath = args[1];
+
+        PathConfig.getInstance().setBase(basePath);
+        PathConfig.getInstance().setROOT_PATH(rootPath);
+
         CPG cpg = new CPG();
         Method methodClass = new Method();
         Call callClass = new Call();
@@ -56,27 +65,27 @@ public class GenerateTrainingData {
 //            }
 
             // get cpg
-            String cpgPath = PathConfig.CPG_FOLDER_PATH + File.separator + subPath + File.separator + "cpg.bin.zip";
+            String cpgPath = PathConfig.getInstance().getCPG_FOLDER_PATH() + File.separator + subPath + File.separator + "cpg.bin.zip";
 //            File cpgFile = cpg.getCPGFileBySourceFolder(sourceFile, cpgPath);
             File cpgFile = new File(cpgPath);
 
             // get ast
-            String astPath = PathConfig.AST_FOLDER_PATH + File.separator + subPath + File.separator + "ast.dot";
+            String astPath = PathConfig.getInstance().getAST_FOLDER_PATH() + File.separator + subPath + File.separator + "ast.dot";
 //            File astFile = cpg.getASTFileByCPGFile(cpgFile, astPath);
             File astFile = new File(astPath);
 
             // get cfg
-            String cfgPath = PathConfig.CFG_FOLDER_PATH + File.separator + subPath + File.separator + "cfg.dot";
+            String cfgPath = PathConfig.getInstance().getCFG_FOLDER_PATH() + File.separator + subPath + File.separator + "cfg.dot";
 //            File cfgFile = cpg.getCFGFileByCPGFile(cpgFile, cfgPath);
             File cfgFile = new File(cfgPath);
 
             // get method info
-            String methodInfoPath = PathConfig.METHOD_INFO_FOLDER_PATH + File.separator + subPath + File.separator + "methodInfo.txt";
+            String methodInfoPath = PathConfig.getInstance().getMETHOD_INFO_FOLDER_PATH() + File.separator + subPath + File.separator + "methodInfo.txt";
 //            File methodInfoFile = cpg.getMethodInfoFileByCpgFile(cpgFile, methodInfoPath);
             File methodInfoFile = new File(methodInfoPath);
 
             // get call
-            String callPath = PathConfig.CALL_FOLDER_PATH + File.separator + subPath + File.separator + "call.txt";
+            String callPath = PathConfig.getInstance().getCALL_FOLDER_PATH() + File.separator + subPath + File.separator + "call.txt";
 //            File callFile = cpg.getCallFileByCPGFile(cpgFile, callPath);
             File callFile = new File(callPath);
 
@@ -106,7 +115,7 @@ public class GenerateTrainingData {
 
             if (methodCallList.isEmpty()) {
                 // do not have call relationship, use it directly
-                String featureCfgDotPath = PathConfig.FEATURE_CFG_FOLDER_PATH + File.separator + subPath + File.separator + "0.dot";
+                String featureCfgDotPath = PathConfig.getInstance().getFEATURE_CFG_FOLDER_PATH() + File.separator + subPath + File.separator + "0.dot";
                 Method selectedMethod = null;
                 // some method contains operator.<>
                 for (Method method : methodList) {
@@ -118,18 +127,18 @@ public class GenerateTrainingData {
 
                 assert selectedMethod != null;
                 String astString = Tool.traverseAST(selectedMethod.getAst());
-                File astContentFile = new File(PathConfig.AST_CONTENT_FOLDER_PATH + File.separator + index + ".txt");
+                File astContentFile = new File(PathConfig.getInstance().getAST_CONTENT_FOLDER_PATH() + File.separator + index + ".txt");
                 if (astContentFile.exists()) {
                     astContentFile.delete();
                 }
 
-                File textContentFile = new File(PathConfig.TEXT_CONTENT_FOLDER_PATH + File.separator + index + ".txt");
+                File textContentFile = new File(PathConfig.getInstance().getTEXT_CONTENT_FOLDER_PATH() + File.separator + index + ".txt");
                 if (textContentFile.exists()) {
                     textContentFile.delete();
                 }
 
                 // the relationship between methods and function
-                File methodInFuncFolder = new File(PathConfig.METHOD_IN_FUNC_FOLDER_PATH + File.separator + subPath);
+                File methodInFuncFolder = new File(PathConfig.getInstance().getMETHOD_IN_FUNC_FOLDER_PATH() + File.separator + subPath);
                 if (!methodInFuncFolder.exists()) {
                     methodInFuncFolder.mkdirs();
                 }
@@ -154,7 +163,7 @@ public class GenerateTrainingData {
                 // remove redundant node
                 CFGGraph simplifyCfgGraph = Tool.simplifyCFGGraphOfAddedCallRelationship(cfgGraph);
 
-                File graphJsonFile = Tool.generateGraphFile(simplifyCfgGraph, PathConfig.CFG_CONTENT_FOLDER_PATH + File.separator + index + ".json");
+                File graphJsonFile = Tool.generateGraphFile(simplifyCfgGraph, PathConfig.getInstance().getCFG_CONTENT_FOLDER_PATH() + File.separator + index + ".json");
                 index++;
 
                 File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(simplifyCfgGraph, featureCfgDotPath);
@@ -166,7 +175,7 @@ public class GenerateTrainingData {
 
             } else {
                 // the relationship between methods and function
-                File methodInFuncFolder = new File(PathConfig.METHOD_IN_FUNC_FOLDER_PATH + File.separator + subPath);
+                File methodInFuncFolder = new File(PathConfig.getInstance().getMETHOD_IN_FUNC_FOLDER_PATH() + File.separator + subPath);
                 if (!methodInFuncFolder.exists()) {
                     methodInFuncFolder.mkdirs();
                 }
@@ -178,12 +187,12 @@ public class GenerateTrainingData {
                     Feature feature = featureList.get(i);
 
                     String astString = Tool.traverseAST(feature);
-                    File astContentFile = new File(PathConfig.AST_CONTENT_FOLDER_PATH + File.separator + index + ".txt");
+                    File astContentFile = new File(PathConfig.getInstance().getAST_CONTENT_FOLDER_PATH() + File.separator + index + ".txt");
                     if (astContentFile.exists()) {
                         astContentFile.delete();
                     }
 
-                    File textContentFile = new File(PathConfig.TEXT_CONTENT_FOLDER_PATH + File.separator + index + ".txt");
+                    File textContentFile = new File(PathConfig.getInstance().getTEXT_CONTENT_FOLDER_PATH() + File.separator + index + ".txt");
                     if (textContentFile.exists()) {
                         textContentFile.delete();
                     }
@@ -220,8 +229,8 @@ public class GenerateTrainingData {
 
                     try {
                         FileUtils.write(astContentFile, astString, StandardCharsets.UTF_8, true);
-                        FileUtils.write(methodInFuncFile, methodInFunc.toString() + PathConfig.LINE_SEP, StandardCharsets.UTF_8, true);
-                        FileUtils.write(textContentFile, textContent.toString().trim() + PathConfig.LINE_SEP, StandardCharsets.UTF_8, true);
+                        FileUtils.write(methodInFuncFile, methodInFunc.toString() + Config.LINE_SEP, StandardCharsets.UTF_8, true);
+                        FileUtils.write(textContentFile, textContent.toString().trim() + Config.LINE_SEP, StandardCharsets.UTF_8, true);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -230,10 +239,10 @@ public class GenerateTrainingData {
 
                     CFGGraph simplifyCfgGraph = Tool.simplifyCFGGraphOfAddedCallRelationship(cfgGraph);
 
-                    File graphJsonFile = Tool.generateGraphFile(simplifyCfgGraph, PathConfig.CFG_CONTENT_FOLDER_PATH + File.separator + index + ".json");
+                    File graphJsonFile = Tool.generateGraphFile(simplifyCfgGraph, PathConfig.getInstance().getCFG_CONTENT_FOLDER_PATH() + File.separator + index + ".json");
                     index++;
 
-                    String featureCfgDotPath = PathConfig.FEATURE_CFG_FOLDER_PATH + File.separator + subPath + File.separator + i + ".dot";
+                    String featureCfgDotPath = PathConfig.getInstance().getFEATURE_CFG_FOLDER_PATH() + File.separator + subPath + File.separator + i + ".dot";
                     File cfgDotFile = Tool.constructCFGDotFileOfCFGGraph(simplifyCfgGraph, featureCfgDotPath);
 
                     dot2cfgPath.add(cfgDotFile.getAbsolutePath() + " " + graphJsonFile.getAbsolutePath());
@@ -245,7 +254,7 @@ public class GenerateTrainingData {
         }
 
         // save dot2cfg map
-        File cfgDotFilePath2graphJsonFile = new File(PathConfig.DOT2CFG_PATH);
+        File cfgDotFilePath2graphJsonFile = new File(PathConfig.getInstance().getDOT2CFG_PATH());
         if (cfgDotFilePath2graphJsonFile.exists()) {
             cfgDotFilePath2graphJsonFile.delete();
         }
@@ -256,7 +265,7 @@ public class GenerateTrainingData {
         }
 
         // save dot2ast map
-        File dotFile2astContentFile = new File(PathConfig.DOT2AST_PATH);
+        File dotFile2astContentFile = new File(PathConfig.getInstance().getDOT2AST_PATH());
         if (dotFile2astContentFile.exists()) {
             dotFile2astContentFile.delete();
         }
@@ -267,7 +276,7 @@ public class GenerateTrainingData {
         }
 
         // save dot2text map
-        File dotFile2textContentFile = new File(PathConfig.DOT2TEXT_PATH);
+        File dotFile2textContentFile = new File(PathConfig.getInstance().getDOT2TEXT_PATH());
         if (dotFile2textContentFile.exists()) {
             dotFile2textContentFile.delete();
         }
@@ -278,27 +287,29 @@ public class GenerateTrainingData {
         }
 
         // generate ast corpus
-        File astCorpusFile = Word2Vec.generateCorpusFromFolder(PathConfig.AST_CONTENT_FOLDER_PATH, PathConfig.AST_WORD2VEC_CORPUS_FILE_PATH);
+        File astCorpusFile = Word2Vec.generateCorpusFromFolder(PathConfig.getInstance().getAST_CONTENT_FOLDER_PATH(), PathConfig.getInstance().getAST_WORD2VEC_CORPUS_FILE_PATH());
         // generate word2vec vectors for corpus
-        File word2vecOutFile = Word2Vec.generateWord2vecFile(astCorpusFile, PathConfig.AST_WORD2VEC_OUT_FILE_PATH, CmdConfig.WORD2VEC_CMD_PATH, 16);
+        File word2vecOutFile = Word2Vec.generateWord2vecFile(astCorpusFile, PathConfig.getInstance().getAST_WORD2VEC_OUT_FILE_PATH(), PathConfig.getInstance().getWORD2VEC_CMD_PATH(), 16);
         // generate syntax feature, according to the folder structure
-        Word2Vec.generateSyntaxFeatureFiles(word2vecOutFile, dotFile2astContentFile, PathConfig.SYNTAX_FEATURE_FOLDER_PATH);
+        Word2Vec.generateSyntaxFeatureFiles(word2vecOutFile, dotFile2astContentFile, PathConfig.getInstance().getSYNTAX_FEATURE_FOLDER_PATH());
 
         // generate graph2vec vectors for cfg
-        File graph2vecOutFile = Graph2Vec.generateGraph2VecFeatureFile(PathConfig.CFG_CONTENT_FOLDER_PATH, PathConfig.CFG_GRAPH2VEC_OUT_PATH, 16);
+        File graph2vecOutFile = Graph2Vec.generateGraph2VecFeatureFile(PathConfig.getInstance().getCFG_CONTENT_FOLDER_PATH(), PathConfig.getInstance().getCFG_GRAPH2VEC_OUT_PATH(), 16);
         // generate semantic feature, according to the folder structure
         Graph2Vec.generateSemanticFeatureFiles(graph2vecOutFile, cfgDotFilePath2graphJsonFile);
 
         // generate text vectors
-        File textCorpusFile = Word2Vec.generateCorpusFromFolder(PathConfig.TEXT_CONTENT_FOLDER_PATH, PathConfig.TEXT_WORD2VEC_CORPUS_FILE_PATH);
+        File textCorpusFile = Word2Vec.generateCorpusFromFolder(PathConfig.getInstance().getTEXT_CONTENT_FOLDER_PATH(), PathConfig.getInstance().getTEXT_WORD2VEC_CORPUS_FILE_PATH());
         // generate word2vec vectors for corpus
-        File textWord2vecOutFile = Word2Vec.generateWord2vecFile(textCorpusFile, PathConfig.TEXT_WORD2VEC_OUT_FILE_PATH, CmdConfig.WORD2VEC_CMD_PATH, 16);
+        File textWord2vecOutFile = Word2Vec.generateWord2vecFile(textCorpusFile, PathConfig.getInstance().getTEXT_WORD2VEC_OUT_FILE_PATH(), PathConfig.getInstance().getWORD2VEC_CMD_PATH(), 16);
         // generate syntax feature
-        Word2Vec.generateSyntaxFeatureFiles(textWord2vecOutFile, dotFile2textContentFile, PathConfig.TEXT_FEATURE_FOLDER_PATH);
+        Word2Vec.generateSyntaxFeatureFiles(textWord2vecOutFile, dotFile2textContentFile, PathConfig.getInstance().getTEXT_FEATURE_FOLDER_PATH());
 
-        Tool.generateTrainingData(PathConfig.TRAINING_MERGE_DATA_FILE_PATH,
-                PathConfig.TRAINING_TEXT_DATA_FILE_PATH, PathConfig.TRAINING_SYNTAX_DATA_FILE_PATH, PathConfig.TRAINING_SEMANTIC_DATA_FILE_PATH,
-                PathConfig.TRAINING_TEXT_SYNTAX_DATA_FILE_PATH, PathConfig.TRAINING_TEXT_SEMANTIC_DATA_FILE_PATH, PathConfig.TRAINING_SYNTAX_SEMANTIC_DATA_FILE_PATH,
-                PathConfig.TEXT_FEATURE_FOLDER_PATH, PathConfig.SYNTAX_FEATURE_FOLDER_PATH, PathConfig.SEMANTIC_FEATURE_FOLDER_PATH);
+        Tool.generateTrainingData(PathConfig.getInstance().getTRAINING_MERGE_DATA_FILE_PATH(),
+                PathConfig.getInstance().getTRAINING_TEXT_DATA_FILE_PATH(), PathConfig.getInstance().getTRAINING_SYNTAX_DATA_FILE_PATH(),
+                PathConfig.getInstance().getTRAINING_SEMANTIC_DATA_FILE_PATH(), PathConfig.getInstance().getTRAINING_TEXT_SYNTAX_DATA_FILE_PATH(),
+                PathConfig.getInstance().getTRAINING_TEXT_SEMANTIC_DATA_FILE_PATH(), PathConfig.getInstance().getTRAINING_SYNTAX_SEMANTIC_DATA_FILE_PATH(),
+                PathConfig.getInstance().getTEXT_FEATURE_FOLDER_PATH(), PathConfig.getInstance().getSYNTAX_FEATURE_FOLDER_PATH(),
+                PathConfig.getInstance().getSEMANTIC_FEATURE_FOLDER_PATH());
     }
 }

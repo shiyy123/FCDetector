@@ -16,27 +16,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: com.opencsv:opencsv:5.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.9" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.commons:commons-text:1.7" level="project" />
-    <orderEntry type="library" name="Maven: commons-beanutils:commons-beanutils:1.9.4" level="project" />
-    <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.2" level="project" />
-    <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2.2" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.commons:commons-collections4:4.4" level="project" />
     <orderEntry type="library" name="Maven: com.github.javaparser:javaparser-symbol-solver-core:3.15.7" level="project" />
-    <orderEntry type="library" name="Maven: com.github.javaparser:javaparser-symbol-solver-logic:3.15.7" level="project" />
-    <orderEntry type="library" name="Maven: org.javassist:javassist:3.24.0-GA" level="project" />
-    <orderEntry type="library" name="Maven: com.github.javaparser:javaparser-symbol-solver-model:3.15.7" level="project" />
-    <orderEntry type="library" name="Maven: com.google.guava:guava:27.0-jre" level="project" />
-    <orderEntry type="library" name="Maven: com.google.guava:failureaccess:1.0" level="project" />
-    <orderEntry type="library" name="Maven: com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava" level="project" />
-    <orderEntry type="library" name="Maven: com.google.code.findbugs:jsr305:3.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.checkerframework:checker-qual:2.5.2" level="project" />
-    <orderEntry type="library" name="Maven: com.google.errorprone:error_prone_annotations:2.2.0" level="project" />
-    <orderEntry type="library" name="Maven: com.google.j2objc:j2objc-annotations:1.1" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.mojo:animal-sniffer-annotations:1.17" level="project" />
     <orderEntry type="library" name="Maven: com.github.javaparser:javaparser-core-serialization:3.15.7" level="project" />
-    <orderEntry type="library" name="Maven: com.github.javaparser:javaparser-core:3.15.7" level="project" />
-    <orderEntry type="library" name="Maven: javax.json:javax.json-api:1.1.4" level="project" />
     <orderEntry type="library" name="Maven: commons-cli:commons-cli:1.4" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.6" level="project" />
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />

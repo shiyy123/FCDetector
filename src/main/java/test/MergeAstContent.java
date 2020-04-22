@@ -11,7 +11,7 @@ import java.util.List;
 
 public class MergeAstContent {
     public static void main(String[] args) {
-        File[] astContentFiles = new File(PathConfig.AST_CONTENT_FOLDER_PATH).listFiles();
+        File[] astContentFiles = new File(PathConfig.getInstance().getAST_CONTENT_FOLDER_PATH()).listFiles();
         assert astContentFiles != null;
         List<String> contentList = new ArrayList<>();
         for (File astContentFile : astContentFiles) {
@@ -26,7 +26,7 @@ public class MergeAstContent {
                 e.printStackTrace();
             }
         }
-        File astContentFile = new File(PathConfig.base + File.separator + "corpus.src");
+        File astContentFile = new File(PathConfig.getInstance().getBase() + File.separator + "corpus.src");
         if (astContentFile.exists()) {
             astContentFile.delete();
         }

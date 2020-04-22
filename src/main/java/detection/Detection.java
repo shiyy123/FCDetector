@@ -56,8 +56,8 @@ public class Detection {
 
     private static String getFuncNamesByFeatureId(File sourceCodeFile, int id) {
         String folderAndFilePath = Tool.getFolderAndFilePath(sourceCodeFile);
-        File featureFile = new File(PathConfig.FEATURE_FOLDER_PATH + File.separator + folderAndFilePath + File.separator + "feature.txt");
-        File funcFile = new File(PathConfig.FUNC_FOLDER_PATH + File.separator + folderAndFilePath + File.separator + "func.txt");
+        File featureFile = new File(PathConfig.getInstance().getFEATURE_FOLDER_PATH() + File.separator + folderAndFilePath + File.separator + "feature.txt");
+        File funcFile = new File(PathConfig.getInstance().getFUNC_FOLDER_PATH() + File.separator + folderAndFilePath + File.separator + "func.txt");
 
         HashMap<Integer, String> map = new HashMap<>();
         List<String> funcList = new ArrayList<>();
@@ -94,7 +94,7 @@ public class Detection {
     private static boolean isClone(List<Double> feature1, List<Double> feature2) {
         boolean clone = false;
 
-        File tmpFeatureFile = new File(PathConfig.TMP_PATH + File.separator + "feature1.txt");
+        File tmpFeatureFile = new File(PathConfig.getInstance().getTMP_PATH() + File.separator + "feature1.txt");
         if (tmpFeatureFile.exists()) {
             tmpFeatureFile.delete();
         }

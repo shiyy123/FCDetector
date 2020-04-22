@@ -105,10 +105,10 @@ public class AST {
         this.astNodeList = astNodeList;
     }
 
-    public static List<File> sourceFile2ASTFileList(File sourceFile) {
+    public List<File> sourceFile2ASTFileList(File sourceFile) {
         String folderAndFilePath = Tool.getFolderAndFilePath(sourceFile);
 
-        File[] files = new File(PathConfig.AST_FOLDER_PATH + File.separator + folderAndFilePath).listFiles();
+        File[] files = new File(PathConfig.getInstance().getAST_FOLDER_PATH() + File.separator + folderAndFilePath).listFiles();
         List<File> fileList = new ArrayList<>();
         assert files != null;
         Collections.addAll(fileList, files);
@@ -116,7 +116,7 @@ public class AST {
     }
 
     // 为每个method生成相应的ast dot文件，存放路径 base/ast/{classFolder/sourceFile/methodName_signature/ast.dot}
-    public static void generateASTForEachMethod(File methodInfoFile) {
+    public void generateASTForEachMethod(File methodInfoFile) {
         Map<String, List<MethodInfo>> methodPath2MethodInfoList = MethodInfo.getMethodPath2MethodInfoByMethodInfoFile(methodInfoFile);
     }
 }

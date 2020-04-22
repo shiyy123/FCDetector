@@ -23,7 +23,7 @@ public class Graph2Vec {
             graphFeatureFile.delete();
         }
 
-        String cmd = CmdConfig.GRAPH2VEC_VENV_PATH + " " + CmdConfig.GRAPH2VEC_SCRIPT_PATH + " --input-path " + cfgContentFolderPath + File.separator +
+        String cmd = PathConfig.getInstance().getGRAPH2VEC_VENV_PATH() + " " + PathConfig.getInstance().getGRAPH2VEC_SCRIPT_PATH() + " --input-path " + cfgContentFolderPath + File.separator +
                 " --output-path " + graphFeaturePath + " --dimensions " + featureLength;
         Tool.executeCmdAndSaveLog(cmd, logger);
         return graphFeatureFile;
@@ -55,7 +55,7 @@ public class Graph2Vec {
         for (Map.Entry<String, List<Double>> entry : subPath2CfgVec.entrySet()) {
             String subFolderPath = entry.getKey().substring(0, entry.getKey().lastIndexOf(File.separator));
             String fileName = entry.getKey().substring(entry.getKey().lastIndexOf(File.separator) + 1);
-            String semanticFeatureFolderPath = PathConfig.SEMANTIC_FEATURE_FOLDER_PATH + File.separator + subFolderPath;
+            String semanticFeatureFolderPath = PathConfig.getInstance().getSEMANTIC_FEATURE_FOLDER_PATH() + File.separator + subFolderPath;
 
             File semanticFeatureFolder = new File(semanticFeatureFolderPath);
             if (!semanticFeatureFolder.exists()) {

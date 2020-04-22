@@ -9,8 +9,7 @@ import cfg.CFGGraph;
 import cfg.CFGNode;
 import com.opencsv.CSVWriter;
 import config.CFGConfig;
-import config.CmdConfig;
-import config.PathConfig;
+import config.Config;
 import feature.Feature;
 import method.Method;
 import method.MethodCall;
@@ -28,7 +27,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * @author cary.shi on 2019/11/29
@@ -105,7 +103,7 @@ public class Tool {
             String formatNodeId = formatId(cfgNode.getId());
 
             nodeLine.append(formatNodeId).append(" ").append(" [label=\"").
-                    append(formatNodeId).append(PathConfig.LINE_SEP).
+                    append(formatNodeId).append(Config.LINE_SEP).
                     append(cfgNode.getProperties().getOrDefault(CFGConfig.CODE_PROPERTY, "").replace("\"", "\\\"")).
                     append("\"];");
             try {
@@ -162,21 +160,21 @@ public class Tool {
             String columnNum = cfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "");
 
             nodeLine.append(formatNodeId).append(" ").append(" [label=\"").
-                    append(formatNodeId).append(PathConfig.LINE_SEP);
+                    append(formatNodeId).append(Config.LINE_SEP);
 
             if (code.length() > 0) {
-                nodeLine.append("code:").append(cfgNode.getProperties().getOrDefault(CFGConfig.CODE_PROPERTY, "").replace("\"", "\\\"")).append(PathConfig.LINE_SEP);
+                nodeLine.append("code:").append(cfgNode.getProperties().getOrDefault(CFGConfig.CODE_PROPERTY, "").replace("\"", "\\\"")).append(Config.LINE_SEP);
             }
             if (lineNum.length() > 0) {
-                nodeLine.append("lineNum:").append(cfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "")).append(PathConfig.LINE_SEP);
+                nodeLine.append("lineNum:").append(cfgNode.getProperties().getOrDefault(CFGConfig.LINE_NUMBER_PROPERTY, "")).append(Config.LINE_SEP);
             }
             if (columnNum.length() > 0) {
-                nodeLine.append("columnNum:").append(cfgNode.getProperties().getOrDefault(CFGConfig.COLUMN_NUMBER_PROPERTY, "")).append(PathConfig.LINE_SEP);
+                nodeLine.append("columnNum:").append(cfgNode.getProperties().getOrDefault(CFGConfig.COLUMN_NUMBER_PROPERTY, "")).append(Config.LINE_SEP);
             }
             nodeLine.append("\"];");
 
             try {
-                FileUtils.write(dotFile, nodeLine.toString() + PathConfig.LINE_SEP, StandardCharsets.UTF_8, true);
+                FileUtils.write(dotFile, nodeLine.toString() + Config.LINE_SEP, StandardCharsets.UTF_8, true);
             } catch (IOException e) {
                 e.printStackTrace();
             }

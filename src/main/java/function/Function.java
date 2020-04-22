@@ -51,7 +51,7 @@ public class Function {
 
         String folderAndFilePath = Tool.getFolderAndFilePath(sourceFile);
 
-        File func = new File(PathConfig.FUNC_FOLDER_PATH + File.separator + folderAndFilePath + File.separator + "func.txt");
+        File func = new File(PathConfig.getInstance().getFUNC_FOLDER_PATH() + File.separator + folderAndFilePath + File.separator + "func.txt");
         List<String> lines = null;
         try {
             lines = FileUtils.readLines(func, StandardCharsets.UTF_8);
@@ -74,7 +74,7 @@ public class Function {
     List<File> getFuncEdgeFileListBySourceFile(File sourceFile) {
         List<File> resList = new ArrayList<>();
         String folderAndFilePath = Tool.getFolderAndFilePath(sourceFile);
-        File[] files = new File(PathConfig.FUNC_EDGE_PATH + File.separator + folderAndFilePath).listFiles();
+        File[] files = new File(PathConfig.getInstance().getFUNC_EDGE_PATH() + File.separator + folderAndFilePath).listFiles();
         assert files != null;
         Collections.addAll(resList, files);
 

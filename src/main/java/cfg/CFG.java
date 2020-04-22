@@ -235,7 +235,7 @@ public class CFG {
     public List<File> sourceFile2CFGFileList(File sourceFile) {
         String folderAndFilePath = Tool.getFolderAndFilePath(sourceFile);
 
-        File[] files = new File(PathConfig.CFG_FOLDER_PATH + File.separator + folderAndFilePath).listFiles();
+        File[] files = new File(PathConfig.getInstance().getCFG_FOLDER_PATH() + File.separator + folderAndFilePath).listFiles();
         List<File> fileList = new ArrayList<>();
         assert files != null;
         Collections.addAll(fileList, files);

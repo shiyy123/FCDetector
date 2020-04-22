@@ -144,7 +144,7 @@ public class CLI {
             String folderAndFilePath = Tool.getFolderAndFilePath(new File(cols[0]));
             String featureId = cols[1];
 
-            File featureFile = new File(PathConfig.FEATURE_CONTENT_PATH + File.separator + folderAndFilePath + File.separator + featureId + ".txt");
+            File featureFile = new File(PathConfig.getInstance().getFEATURE_CONTENT_PATH() + File.separator + folderAndFilePath + File.separator + featureId + ".txt");
             try {
                 List<String> featureContentList = FileUtils.readLines(featureFile, StandardCharsets.UTF_8);
                 featureContentList.forEach(System.out::println);

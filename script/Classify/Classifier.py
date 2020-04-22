@@ -7,7 +7,7 @@ import torch.nn.functional as F
 import sys
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-feature_len = 32
+feature_len = 64
 
 
 def get_data(csv_path):
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     # loss_func = torch.nn.MSELoss()
 
     train_data, test_data, train_label, test_label = \
-        get_data('G:\\share\\CloneData\\data\\training\\text.csv')
+        get_data('G:\\share\\CloneData\\data\\training\\syntax_semantic.csv')
 
     record = open('record.txt', 'a+')
 

@@ -23,7 +23,7 @@ public class CPG {
             System.out.println(sourceFolder.getAbsolutePath());
             for (File sourceFile : Objects.requireNonNull(sourceFolder.listFiles())) {
                 String subPath = Tool.getFolderAndFilePath(sourceFile);
-                File cpgFolder = new File(PathConfig.CPG_FOLDER_PATH + File.separator + subPath);
+                File cpgFolder = new File(PathConfig.getInstance().getCPG_FOLDER_PATH() + File.separator + subPath);
                 if (!cpgFolder.exists()) {
                     cpgFolder.mkdirs();
                 }
@@ -40,11 +40,11 @@ public class CPG {
             System.out.println(sourceFolder.getAbsolutePath());
             for (File sourceFile : Objects.requireNonNull(sourceFolder.listFiles())) {
                 String subPath = Tool.getFolderAndFilePath(sourceFile);
-                File astFolder = new File(PathConfig.AST_FOLDER_PATH + File.separator + subPath);
+                File astFolder = new File(PathConfig.getInstance().getAST_FOLDER_PATH() + File.separator + subPath);
                 if (!astFolder.exists()) {
                     astFolder.mkdirs();
                 }
-                File cpgFile = new File(PathConfig.CPG_FOLDER_PATH + File.separator + subPath + File.separator + "cpg.bin.zip");
+                File cpgFile = new File(PathConfig.getInstance().getCPG_FOLDER_PATH() + File.separator + subPath + File.separator + "cpg.bin.zip");
                 String astPath = astFolder.getAbsolutePath() + File.separator + "ast.dot";
                 getASTFileByCPGFile(cpgFile, astPath);
             }
@@ -59,11 +59,11 @@ public class CPG {
             System.out.println(sourceFolder.getAbsolutePath());
             for (File sourceFile : Objects.requireNonNull(sourceFolder.listFiles())) {
                 String subPath = Tool.getFolderAndFilePath(sourceFile);
-                File cfgFolder = new File(PathConfig.CFG_FOLDER_PATH + File.separator + subPath);
+                File cfgFolder = new File(PathConfig.getInstance().getCFG_FOLDER_PATH() + File.separator + subPath);
                 if (!cfgFolder.exists()) {
                     cfgFolder.mkdirs();
                 }
-                File cpgFile = new File(PathConfig.CPG_FOLDER_PATH + File.separator + subPath + File.separator + "cpg.bin.zip");
+                File cpgFile = new File(PathConfig.getInstance().getCPG_FOLDER_PATH() + File.separator + subPath + File.separator + "cpg.bin.zip");
                 String cfgPath = cfgFolder.getAbsolutePath() + File.separator + "cfg.dot";
                 getCFGFileByCPGFile(cpgFile, cfgPath);
             }
@@ -78,11 +78,11 @@ public class CPG {
             System.out.println(sourceFolder.getAbsolutePath());
             for (File sourceFile : Objects.requireNonNull(sourceFolder.listFiles())) {
                 String subPath = Tool.getFolderAndFilePath(sourceFile);
-                File callFolder = new File(PathConfig.CALL_FOLDER_PATH + File.separator + subPath);
+                File callFolder = new File(PathConfig.getInstance().getCALL_FOLDER_PATH() + File.separator + subPath);
                 if (!callFolder.exists()) {
                     callFolder.mkdirs();
                 }
-                File cpgFile = new File(PathConfig.CPG_FOLDER_PATH + File.separator + subPath + File.separator + "cpg.bin.zip");
+                File cpgFile = new File(PathConfig.getInstance().getCPG_FOLDER_PATH() + File.separator + subPath + File.separator + "cpg.bin.zip");
                 String callPath = callFolder.getAbsolutePath() + File.separator + "call.txt";
                 getCallFileByCPGFile(cpgFile, callPath);
             }
@@ -97,7 +97,7 @@ public class CPG {
             return null;
         }
         Tool.createFolderIfNotExist(cpgOutPath);
-        String cmd = CmdConfig.JOERN_PARSE_CMD_PATH + sourceFolder.getAbsolutePath() + " --out " + cpgOutPath;
+        String cmd = PathConfig.getInstance().getJOERN_PARSE_CMD_PATH() + sourceFolder.getAbsolutePath() + " --out " + cpgOutPath;
         Tool.executeCmdAndSaveLog(cmd, logger);
 
         File cpgOutFile = new File(cpgOutPath);
@@ -117,7 +117,7 @@ public class CPG {
 
         Tool.createFolderIfNotExist(funcFilePath);
 
-        String cmd = CmdConfig.JOERN_CMD_PATH + " --script " + CmdConfig.JOERN_DUMP_FUNC_PATH + " --params cpgFile=" +
+        String cmd = PathConfig.getInstance().getJOERN_CMD_PATH() + " --script " + PathConfig.getInstance().getJOERN_DUMP_FUNC_PATH() + " --params cpgFile=" +
                 cpgFile.getAbsolutePath() + ",outFile=" + funcFile.getAbsolutePath();
 
         Tool.executeCmdAndSaveLog(cmd, logger);
@@ -141,7 +141,7 @@ public class CPG {
         Tool.createFolderIfNotExist(cfgFilePath);
 
         // /mnt/share/code/joern-cli/joern --script /mnt/share/code/joern-cli/scripts/cfg-for-funcs-dump.sc --params cpgFile=a.bin.zip,outFile=a.json
-        String cmd = CmdConfig.JOERN_CMD_PATH + " --script " + CmdConfig.JOERN_DUMP_CFG_PATH + " --params cpgFile=" +
+        String cmd = PathConfig.getInstance().getJOERN_CMD_PATH() + " --script " + PathConfig.getInstance().getJOERN_DUMP_CFG_PATH() + " --params cpgFile=" +
                 cpgFile.getAbsolutePath() + ",outFile=" + cfgFile.getAbsolutePath();
 
         Tool.executeCmdAndSaveLog(cmd, logger);
@@ -164,7 +164,7 @@ public class CPG {
         Tool.createFolderIfNotExist(callFilePath);
 
         // /mnt/share/code/joern-cli/joern --script /mnt/share/code/joern-cli/scripts/list-func-call.sc --params cpgFile=a.bin.zip,outFile=a.json
-        String cmd = CmdConfig.JOERN_CMD_PATH + " --script " + CmdConfig.JOERN_DUMP_FUNC_CALL_PATH + " --params cpgFile=" +
+        String cmd = PathConfig.getInstance().getJOERN_CMD_PATH() + " --script " + PathConfig.getInstance().getJOERN_DUMP_FUNC_CALL_PATH() + " --params cpgFile=" +
                 cpgFile.getAbsolutePath() + ",outFile=" + callFile.getAbsolutePath();
 
         Tool.executeCmdAndSaveLog(cmd, logger);
@@ -178,13 +178,13 @@ public class CPG {
 
     // 获取函数pdg文件
     public File getPDGFileByCPGFile(File cpgFile, String pdgFilePath) {
-        File pdgFile = new File(PathConfig.PDG_FILE_PATH);
+        File pdgFile = new File(PathConfig.getInstance().getPDG_FILE_PATH());
         if (pdgFile.exists()) {
             pdgFile.delete();
         }
         // "/mnt/share/code/joern-cli/joern --script /mnt/share/code/joern-cli/scripts/pdg-for-funcs-dump.sc --params cpgFile=a.bin.zip,outFile=a.json"
 
-        String cmd = CmdConfig.JOERN_CMD_PATH + " --script " + CmdConfig.JOERN_DUMP_PDG_PATH + " --params cpgFile=" +
+        String cmd = PathConfig.getInstance().getJOERN_CMD_PATH() + " --script " + PathConfig.getInstance().getJOERN_DUMP_PDG_PATH() + " --params cpgFile=" +
                 cpgFile.getAbsolutePath() + ",outFile=" + pdgFile.getAbsolutePath();
 
         Tool.executeCmdAndSaveLog(cmd, logger);
@@ -204,7 +204,7 @@ public class CPG {
         }
         Tool.createFolderIfNotExist(astFilePath);
 
-        String cmd = CmdConfig.JOERN_CMD_PATH + " --script " + CmdConfig.JOERN_DUMP_AST_PATH + " --params cpgFile=" +
+        String cmd = PathConfig.getInstance().getJOERN_CMD_PATH() + " --script " + PathConfig.getInstance().getJOERN_DUMP_AST_PATH() + " --params cpgFile=" +
                 cpgFile.getAbsolutePath() + ",outFile=" + astFile.getAbsolutePath();
 
         Tool.executeCmdAndSaveLog(cmd, logger);

@@ -11,7 +11,7 @@ import java.io.File;
 public class CallGraph {
     File sourceCodeFile2CallGraphFile(File sourceCodeFile) {
         String folderAndFilePath = Tool.getFolderAndFilePath(sourceCodeFile);
-        return new File(PathConfig.CALL_FOLDER_PATH + File.separator + folderAndFilePath + File.separator + "call.txt");
+        return new File(PathConfig.getInstance().getCALL_FOLDER_PATH() + File.separator + folderAndFilePath + File.separator + "call.txt");
     }
 
 }

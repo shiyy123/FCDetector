@@ -84,7 +84,7 @@ public class Word2Vec {
         if (word2vecOutFile.exists()) {
             word2vecOutFile.delete();
         }
-        String cmd = CmdConfig.WORD2VEC_SHELL_PATH + " " + corpusFile.getParentFile().getAbsolutePath() + " " +
+        String cmd = PathConfig.getInstance().getWORD2VEC_SHELL_PATH() + " " + corpusFile.getParentFile().getAbsolutePath() + " " +
                 corpusFile.getParentFile().getAbsolutePath() + " " + word2vecCmdPath + " " + length;
 
         Tool.executeCmdAndSaveLog(cmd, logger);
@@ -172,7 +172,7 @@ public class Word2Vec {
         List<File> res = new ArrayList<>();
 
         String folderAndFilePath = Tool.getFolderAndFilePath(sourceFile);
-        File vecFolder = new File(PathConfig.EMBEDDING_FEATURE_WORD2VEC_PATH + File.separator + folderAndFilePath);
+        File vecFolder = new File(PathConfig.getInstance().getEMBEDDING_FEATURE_WORD2VEC_PATH() + File.separator + folderAndFilePath);
         if (!vecFolder.exists()) {
             return null;
         }
@@ -186,7 +186,7 @@ public class Word2Vec {
         List<File> res = new ArrayList<>();
 
         String folderAndFilePath = Tool.getFolderAndFilePath(sourceFile);
-        File[] files = new File(PathConfig.EMBEDDING_FUNC_WORD2VEC_PATH + File.separator + folderAndFilePath).listFiles();
+        File[] files = new File(PathConfig.getInstance().getEMBEDDING_FUNC_WORD2VEC_PATH() + File.separator + folderAndFilePath).listFiles();
         assert files != null;
         Collections.addAll(res, files);
         return res;
@@ -194,7 +194,7 @@ public class Word2Vec {
 
     public static List<File> getEmbeddingFileListBySourceFile(File sourceFile) {
         String folderAndFilePath = Tool.getFolderAndFilePath(sourceFile);
-        File[] embedFiles = new File(PathConfig.IDENT_EMBED_PATH + File.separator + folderAndFilePath).listFiles();
+        File[] embedFiles = new File(PathConfig.getInstance().getIDENT_EMBED_PATH() + File.separator + folderAndFilePath).listFiles();
         List<File> res = new ArrayList<>();
         assert embedFiles != null;
         Collections.addAll(res, embedFiles);

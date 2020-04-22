@@ -35,7 +35,7 @@ public class CalcCodeClone {
         }
 
         for (Map.Entry<String, List<Double>> entry : subPath2AstVec.entrySet()) {
-            File syntaxFeatureFolder = new File(PathConfig.SYNTAX_FEATURE_FOLDER_PATH + File.separator + entry.getKey());
+            File syntaxFeatureFolder = new File(PathConfig.getInstance().getSYNTAX_FEATURE_FOLDER_PATH()+ File.separator + entry.getKey());
             if (!syntaxFeatureFolder.exists()) {
                 syntaxFeatureFolder.mkdirs();
             }
@@ -63,7 +63,7 @@ public class CalcCodeClone {
         }
 
         for (Map.Entry<String, List<Double>> entry : subPath2CfgVec.entrySet()) {
-            File semanticFeatureFolder = new File(PathConfig.SEMANTIC_FEATURE_FOLDER_PATH + File.separator + entry.getKey());
+            File semanticFeatureFolder = new File(PathConfig.getInstance().getSEMANTIC_FEATURE_FOLDER_PATH() + File.separator + entry.getKey());
             if (!semanticFeatureFolder.exists()) {
                 semanticFeatureFolder.mkdirs();
             }
