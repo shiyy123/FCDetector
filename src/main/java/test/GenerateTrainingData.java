@@ -29,6 +29,7 @@ public class GenerateTrainingData {
 
         String basePath = args[0];
         String rootPath = args[1];
+        String sourcePath = args[2];
 
         PathConfig.getInstance().setBase(basePath);
         PathConfig.getInstance().setROOT_PATH(rootPath);
@@ -38,7 +39,7 @@ public class GenerateTrainingData {
         Call callClass = new Call();
 
 //        List<File> fileList = Tool.getSourceFilesFromPath("G:\\share\\CloneData\\data\\src");
-        List<File> fileList = Tool.getSourceFilesFromPath("/mnt/share/CloneData/data/src");
+        List<File> fileList = Tool.getSourceFilesFromPath(sourcePath);
 
         // for save graph json file
         int index = 0;
