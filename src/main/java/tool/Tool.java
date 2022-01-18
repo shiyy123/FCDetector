@@ -865,7 +865,7 @@ public class Tool {
                     List<Double> syntaxVecLeft = Tool.getDoubleListFromFile(syntaxFileList.get(i));
                     List<Double> semanticVecLeft = Tool.getDoubleListFromFile(semanticFileList.get(i));
 
-                    List<Double> textVecRight = Tool.getDoubleListFromFile(textFileList.get(i));
+                    List<Double> textVecRight = Tool.getDoubleListFromFile(textFileList.get(j));
                     List<Double> syntaxVecRight = Tool.getDoubleListFromFile(syntaxFileList.get(j));
                     List<Double> semanticVecRight = Tool.getDoubleListFromFile(semanticFileList.get(j));
 
